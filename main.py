@@ -17,6 +17,20 @@ last_send_time = datetime.now()
 
 ticker = TICKER
 
+log_dir = "./logs"
+data_dir = "./data"
+for file in os.listdir(log_dir):
+    file_path = os.path.join(log_dir, file)
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+for filename in os.listdir(data_dir):
+    if filename.endswith('.csv'):
+        file_path = os.path.join(data_dir, filename)
+
+        empty_df = pd.DataFrame(columns=pd.read_csv(file_path).columns)
+
+        empty_df.to_csv(file_path, index=False)
+
 def main(dataframe):
     dataframe['date'] = dataframe.apply(lambda row: f"date : {row['date']}", axis=1)
 
@@ -97,14 +111,13 @@ while True:
         if current_time - last_send_time >= timedelta(hours=3):
             log.debug("로그 파일 초기화")
             send_log_file("로그 파일 초기화 전 백업")
-            log_dir = "./logs"
             for file in os.listdir(log_dir):
                 file_path = os.path.join(log_dir, file)
                 if os.path.isfile(file_path):
                     os.remove(file_path)
 
             send_mail("데이터 파일 초기화 전 백업")
-            data_dir = "./data"
+
             for filename in os.listdir(data_dir):
                 if filename.endswith('.csv'):
                     file_path = os.path.join(data_dir, filename)
