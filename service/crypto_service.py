@@ -224,26 +224,34 @@ def get_ema_data(ticker, interval, count):
     return data
 
 def get_macd_gradient_for_buy(df):
-    if df['macd_10_20_slope'].iloc[-1] > 0 and df['macd_10_20_slope'].iloc[-2] > 0 and df['macd_10_20_slope'].iloc[-3] > 0:
-        if df['macd_10_60_slope'].iloc[-1] > 0 and df['macd_10_60_slope'].iloc[-2] > 0 and df['macd_10_60_slope'].iloc[-3] > 0:
-            if df['macd_20_60_slope'].iloc[-1] > 0 and df['macd_20_60_slope'].iloc[-2] > 0 and df['macd_20_60_slope'].iloc[-3] > 0:
-                return "BUY_TRUE"
-            else:
-                return "BUY_FALSE"
-        else:
-            return "BUY_FALSE"
+    # if df['macd_10_20_slope'].iloc[-1] > 0 and df['macd_10_20_slope'].iloc[-2] > 0 and df['macd_10_20_slope'].iloc[-3] > 0:
+    #     if df['macd_10_60_slope'].iloc[-1] > 0 and df['macd_10_60_slope'].iloc[-2] > 0 and df['macd_10_60_slope'].iloc[-3] > 0:
+    #         if df['macd_20_60_slope'].iloc[-1] > 0 and df['macd_20_60_slope'].iloc[-2] > 0 and df['macd_20_60_slope'].iloc[-3] > 0:
+    #             return "BUY_TRUE"
+    #         else:
+    #             return "BUY_FALSE"
+    #     else:
+    #         return "BUY_FALSE"
+    # else :
+    #     return "BUY_FALSE"
+    if (df['macd_10_20_slope'].iloc[-1] > 0 and df['macd_10_60_slope'].iloc[-2] > 0) and df['macd_10_60_slope'].iloc[-1] > 0 and df['macd_20_60_slope'].iloc[-1] > 0:
+        return "BUY_TRUE"
     else :
         return "BUY_FALSE"
 
 def get_macd_gradient_for_sell(df):
-    if df['macd_10_20_slope'].iloc[-1] < 0 and df['macd_10_20_slope'].iloc[-2] < 0 and df['macd_10_20_slope'].iloc[-3] < 0:
-        if df['macd_10_60_slope'].iloc[-1] < 0 and df['macd_10_60_slope'].iloc[-2] < 0 and df['macd_10_60_slope'].iloc[-3] < 0:
-            if df['macd_20_60_slope'].iloc[-1] < 0 and df['macd_20_60_slope'].iloc[-2] < 0 and df['macd_20_60_slope'].iloc[-3] < 0:
-                return "SELL_TRUE"
-            else:
-                return "SELL_FALSE"
-        else:
-            return "SELL_FALSE"
+    # if df['macd_10_20_slope'].iloc[-1] < 0 and df['macd_10_20_slope'].iloc[-2] < 0 and df['macd_10_20_slope'].iloc[-3] < 0:
+    #     if df['macd_10_60_slope'].iloc[-1] < 0 and df['macd_10_60_slope'].iloc[-2] < 0 and df['macd_10_60_slope'].iloc[-3] < 0:
+    #         if df['macd_20_60_slope'].iloc[-1] < 0 and df['macd_20_60_slope'].iloc[-2] < 0 and df['macd_20_60_slope'].iloc[-3] < 0:
+    #             return "SELL_TRUE"
+    #         else:
+    #             return "SELL_FALSE"
+    #     else:
+    #         return "SELL_FALSE"
+    # else :
+    #     return "SELL_FALSE"
+    if df['macd_10_20_slope'].iloc[-1] < 0 and df['macd_10_60_slope'].iloc[-1] < 0 and df['macd_20_60_slope'].iloc[-1] < 0:
+        return "SELL_TRUE"
     else :
         return "SELL_FALSE"
 
