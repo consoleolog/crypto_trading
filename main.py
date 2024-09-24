@@ -1,6 +1,8 @@
 import os
 import time
 
+from config import *
+
 import pandas as pd
 
 from langchain_community.document_loaders import DataFrameLoader
@@ -13,7 +15,7 @@ from datetime import datetime, timedelta
 # 이전에 실행한 시간을 저장할 변수 초기화
 last_send_time = datetime.now()
 
-ticker = "BTC"
+ticker = TICKER
 
 def main(dataframe):
     dataframe['date'] = dataframe.apply(lambda row: f"date : {row['date']}", axis=1)
