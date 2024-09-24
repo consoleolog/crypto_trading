@@ -1,9 +1,12 @@
+import os
 import time
+
+import pandas as pd
 
 from langchain_community.document_loaders import DataFrameLoader
 from service.crypto_service import *
 from service.llm_service import *
-from service.mail_service import send_mail
+from service.mail_service import send_mail, send_log_file
 
 from datetime import datetime, timedelta
 
@@ -35,7 +38,7 @@ def main(df):
             if c_result['result'] == "SELL":
                 s_result = do_sell(ticker, amount)
                 log.debug(s_result)
-                send_mail()
+                send_mail("매매 결과")
             else:
                 pass
 
@@ -43,7 +46,7 @@ def main(df):
         amount = get_balances(ticker)
         b_result = do_buy(ticker, amount, 6000)
         log.debug(b_result)
-        send_mail()
+        send_mail("매수 결과")
     else:
         pass
 
@@ -69,20 +72,41 @@ while True:
             log.info("매수 신호")
             amount = get_balances(ticker)
             do_sell(ticker, amount)
-            send_mail()
+            send_mail("매수 결과")
 
         if stage == "stage2" or stage == "stage3" and get_macd_gradient_for_sell(df) == "SELL_TRUE":
             log.info("매도 신호")
             amount = get_balances(ticker)
             do_buy(ticker, amount, 6000)
-            send_mail()
+            send_mail("매도 결과")
 
         # 1시간마다 send_mail() 호출
         current_time = datetime.now()
-        if current_time - last_send_time >= timedelta(hours=1):
-            send_mail()
-            last_send_time = current_time  # 마지막으로 메일을 보낸 시간을 업데이트
+        # if current_time - last_send_time >= timedelta(hours=1):
+        #     send_mail()
+        #     last_send_time = current_time  # 마지막으로 메일을 보낸 시간을 업데이트
 
+        # 12시간마다 로그 파일 , 데이터 파일 초기화
+        if current_time - last_send_time >= timedelta(hours=3):
+            log.debug("로그 파일 초기화")
+            send_log_file("로그 파일 초기화 전 백업")
+            log_dir = "./logs"
+            for file in os.listdir(log_dir):
+                file_path = os.path.join(log_dir, file)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+
+            send_mail("데이터 파일 초기화 전 백업")
+            data_dir = "./data"
+            for filename in os.listdir(data_dir):
+                if filename.endswith('.csv'):
+                    file_path = os.path.join(data_dir, filename)
+
+                    empty_df = pd.DataFrame(columns=pd.read_csv(file_path).columns)
+
+                    empty_df.to_csv(file_path, index=False)
+            # 마지막으로 메일을 보낸 시간을 업데이트
+            last_send_time = current_time
 
     except Exception as e:
         log.error(e)
