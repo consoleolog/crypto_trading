@@ -1,9 +1,0 @@
-[DEBUG] 2024-09-23 11:27:37 : crypto_service.py : crypto_service : 98 - 
-    현재가 : 85223000.0
-    단기 : 85225150.0
-    중기 : 84961850.0
-    장기 : 84760708.0
-    
-[INFO] 2024-09-23 11:27:37 : main.py : main : 17 - stage1
-[INFO] 2024-09-23 11:27:37 : main.py : main : 20 - 매매 구간 돌입
-[ERROR] 2024-09-23 11:27:37 : main.py : main : 53 - Single '}' encountered in format string

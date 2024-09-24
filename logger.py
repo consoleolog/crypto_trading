@@ -8,8 +8,6 @@ datefmt = '%Y-%m-%d %H:%M:%S'
 
 filefmt = '%Y%m%d%H%M'
 
-t = time.strftime(filefmt, time.localtime(time.time()))
-
 def get_logger(logging_service="undefined"):
     logger = logging.getLogger(f"{logging_service}_logger")
     logger.setLevel(logging.DEBUG)
@@ -60,4 +58,4 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt, datefmt=datefmt)
         return formatter.format(record)
 
-log = get_logger(f"crypto_{t}")
+log = get_logger(f"crypto")
