@@ -26,10 +26,6 @@ def save_buy_or_sell_history(bs, df):
         with open('./data/crypto_buy_history.csv', 'a', encoding='utf-8') as f:
             f.write(f"\n {fdt}, {df['market']}, {df['price']} , {df['market_price']}")
             f.close()
-    elif bs == "SELL":
-        with open('./data/crypto_sell_history.csv', 'a', encoding='utf-8') as f:
-            f.write(f"\n {fdt}, {df['market']} , {df['market_price']}")
-            f.close()
     else:
         pass
 
