@@ -20,6 +20,7 @@ def main(df):
     data = loader.load()
 
     d_result = decision_buy_or_sell(data)
+    log.info(d_result['result'])
 
     if d_result['result'] == "SELL":
         amount = get_balances(ticker)
@@ -29,6 +30,7 @@ def main(df):
         else:
             latest_history = crypto_repository.get_latest_buy_history()
             c_result = compare_with_mine(latest_history, pyupbit.get_current_price(f"KRW-{ticker}"))
+            log.info(c_result['result'])
 
             if c_result['result'] == "SELL":
                 s_result = do_sell(ticker, amount)
@@ -86,4 +88,4 @@ while True:
         log.error(e)
         pass
 
-    time.sleep(60)
+    time.sleep(180)

@@ -4,7 +4,7 @@ from config import *
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from langchain_core.output_parsers import StrOutputParser, SimpleJsonOutputParser, JsonOutputParser
+from langchain_core.output_parsers import SimpleJsonOutputParser, JsonOutputParser
 
 from logger import log
 
@@ -88,7 +88,7 @@ def decision_buy_or_sell(data):
         result = chain.invoke({
             "data":data
         })
-        log.debug(result)
+        log.debug(result['reason'])
         return result
     except Exception as e:
         log.error(e)
@@ -145,7 +145,7 @@ def compare_with_mine(my_balance, market_balance):
             "myBalance": my_balance,
             "marketBalance": market_balance
         })
-        log.debug(result)
+        log.debug(result['reason'])
         return result
     except Exception as e:
         log.error(e)
@@ -194,7 +194,7 @@ def analyze_macd_gradient(data):
         result = chain.invoke({
             "data": data
         })
-        # log.debug(result)
+        log.debug(result['reason'])
         return result
     except Exception as e:
         log.error(e)
