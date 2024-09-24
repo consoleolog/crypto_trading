@@ -68,12 +68,26 @@ while True:
                 log.info("매수 신호")
                 main(df)
 
-        if (stage == "stage1" or stage == "stage2" or stage == "stage3") and get_macd_gradient_for_sell(df) == "SELL_TRUE":
+        if (stage == "stage2" or stage == "stage3") and get_macd_gradient_for_sell(df) == "SELL_TRUE":
             macd_s_result = get_macd_gradient_for_sell(df)
             log.info(macd_s_result)
             if macd_s_result == "SELL_TRUE":
                 log.info("매도 신호")
                 main(df)
+
+        if stage == "stage1" :
+            macd_b_result = get_macd_gradient_for_buy(df)
+            if macd_b_result == "BUY_TRUE":
+                log.info(macd_b_result)
+                log.info("매수 신호")
+                main(df)
+            else :
+                macd_s_result = get_macd_gradient_for_sell(df)
+                log.info(macd_s_result)
+                if macd_s_result == "SELL_TRUE":
+                    log.info("매도 신호")
+                    main(df)
+
 
         current_time = datetime.now()
 
