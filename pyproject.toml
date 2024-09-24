@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "crypto-bot"
+version = "0.1.0"
+description = ""
+authors = ["consolelog <leopportunity5@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+pyupbit = "^0.2.34"
+pandas = "^2.2.2"
+python-dotenv = "^1.0.1"
+langchain-openai = "^0.2.0"
+langchain-core = "^0.3.2"
+pydantic = "^2.9.2"
+langchain-community = "^0.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

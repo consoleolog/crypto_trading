@@ -1,0 +1,24 @@
+[DEBUG] 2024-09-24 11:43:00 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84122000.0
+    단기 : 84204200.0
+    중기 : 84419383.0
+    장기 : 84603091.0
+[INFO] 2024-09-24 11:43:00 : main.py : main : 18 - stage4
+[DEBUG] 2024-09-24 11:46:00 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84200000.0
+    단기 : 84196650.0
+    중기 : 84410866.0
+    장기 : 84598008.0
+[INFO] 2024-09-24 11:46:00 : main.py : main : 18 - stage4
+[DEBUG] 2024-09-24 11:49:01 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84299000.0
+    단기 : 84206750.0
+    중기 : 84405700.0
+    장기 : 84594483.0
+[INFO] 2024-09-24 11:49:01 : main.py : main : 18 - stage4
+[DEBUG] 2024-09-24 11:52:01 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84370000.0
+    단기 : 84213900.0
+    중기 : 84399583.0
+    장기 : 84590308.0
+[INFO] 2024-09-24 11:52:01 : main.py : main : 18 - stage4

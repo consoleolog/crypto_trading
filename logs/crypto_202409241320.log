@@ -1,0 +1,102 @@
+[DEBUG] 2024-09-24 13:20:18 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84256000.0
+    단기 : 84387300.0
+    중기 : 84321300.0
+    장기 : 84486816.0
+[INFO] 2024-09-24 13:20:18 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:23:18 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84246000.0
+    단기 : 84378200.0
+    중기 : 84316966.0
+    장기 : 84482250.0
+[INFO] 2024-09-24 13:23:18 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:26:18 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84314000.0
+    단기 : 84375300.0
+    중기 : 84318566.0
+    장기 : 84478616.0
+[INFO] 2024-09-24 13:26:18 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:29:18 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84315000.0
+    단기 : 84371800.0
+    중기 : 84318950.0
+    장기 : 84474741.0
+[INFO] 2024-09-24 13:29:18 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:32:19 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84299000.0
+    단기 : 84371000.0
+    중기 : 84320800.0
+    장기 : 84470958.0
+[INFO] 2024-09-24 13:32:19 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:35:19 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84278000.0
+    단기 : 84368250.0
+    중기 : 84321300.0
+    장기 : 84466616.0
+[INFO] 2024-09-24 13:35:19 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:38:19 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84277000.0
+    단기 : 84369600.0
+    중기 : 84319550.0
+    장기 : 84462633.0
+[INFO] 2024-09-24 13:38:19 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:41:19 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84240000.0
+    단기 : 84364850.0
+    중기 : 84319800.0
+    장기 : 84458691.0
+[INFO] 2024-09-24 13:41:19 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:44:20 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84241000.0
+    단기 : 84355950.0
+    중기 : 84318000.0
+    장기 : 84454808.0
+[INFO] 2024-09-24 13:44:20 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:47:20 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84261000.0
+    단기 : 84347650.0
+    중기 : 84316166.0
+    장기 : 84451150.0
+[INFO] 2024-09-24 13:47:20 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:50:20 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84217000.0
+    단기 : 84339350.0
+    중기 : 84316983.0
+    장기 : 84447508.0
+[INFO] 2024-09-24 13:50:20 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:53:20 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84217000.0
+    단기 : 84328250.0
+    중기 : 84316450.0
+    장기 : 84443125.0
+[INFO] 2024-09-24 13:53:20 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:56:21 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84262000.0
+    단기 : 84323300.0
+    중기 : 84317000.0
+    장기 : 84439966.0
+[INFO] 2024-09-24 13:56:21 : main.py : main : 18 - stage5
+[DEBUG] 2024-09-24 13:59:21 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84270000.0
+    단기 : 84316500.0
+    중기 : 84317116.0
+    장기 : 84436416.0
+[INFO] 2024-09-24 13:59:21 : main.py : main : 18 - stage4
+[DEBUG] 2024-09-24 14:02:21 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84317000.0
+    단기 : 84309900.0
+    중기 : 84318283.0
+    장기 : 84433000.0
+[INFO] 2024-09-24 14:02:21 : main.py : main : 18 - stage4
+[DEBUG] 2024-09-24 14:05:21 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84300000.0
+    단기 : 84304950.0
+    중기 : 84319533.0
+    장기 : 84429883.0
+[INFO] 2024-09-24 14:05:21 : main.py : main : 18 - stage4
+[DEBUG] 2024-09-24 14:08:22 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84391000.0
+    단기 : 84305550.0
+    중기 : 84322283.0
+    장기 : 84427491.0
+[INFO] 2024-09-24 14:08:22 : main.py : main : 18 - stage4

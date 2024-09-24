@@ -1,0 +1,28 @@
+[DEBUG] 2024-09-23 11:19:04 : crypto_service.py : crypto_service : 98 - 
+    현재가 : 85209000.0
+    단기 : 85199250.0
+    중기 : 84945866.0
+    장기 : 84741633.0
+    
+[INFO] 2024-09-23 11:19:04 : main.py : main : 17 - stage1
+[INFO] 2024-09-23 11:19:04 : main.py : main : 21 - 매매 구간 돌입
+[ERROR] 2024-09-23 11:19:04 : main.py : main : 54 - Single '}' encountered in format string
+[DEBUG] 2024-09-23 11:20:00 : crypto_service.py : crypto_service : 98 - 
+    현재가 : 85209000.0
+    단기 : 85199250.0
+    중기 : 84945866.0
+    장기 : 84741633.0
+    
+[INFO] 2024-09-23 11:20:00 : main.py : main : 17 - stage1
+[INFO] 2024-09-23 11:20:00 : main.py : main : 21 - 매매 구간 돌입
+[DEBUG] 2024-09-23 11:20:02 : llm_service.py : llm_service : 75 - {'reason': '현재 가격인 85209000이 이동 평균선(sma20: 85199250.0, sma60: 84945866.0)보다 위에 있으며, 가격은 상승 기조를 유지하고 있습니다. 따라서 매수 조건에 부합하여 매수 신호가 발생합니다.', 'result': 'BUY'}
+[DEBUG] 2024-09-23 11:20:02 : main.py : main : 49 - {'uuid': '5bb423b4-230d-4feb-807f-bfdef660e912', 'side': 'bid', 'ord_type': 'price', 'price': '6000', 'state': 'wait', 'market': 'KRW-BTC', 'created_at': '2024-09-23T11:19:57+09:00', 'reserved_fee': '3', 'remaining_fee': '3', 'paid_fee': '0', 'locked': '6003', 'executed_volume': '0', 'trades_count': 0, 'market_price': 85209000.0}
+[DEBUG] 2024-09-23 11:23:02 : crypto_service.py : crypto_service : 98 - 
+    현재가 : 85210000.0
+    단기 : 85209500.0
+    중기 : 84949800.0
+    장기 : 84747583.0
+    
+[INFO] 2024-09-23 11:23:02 : main.py : main : 17 - stage1
+[INFO] 2024-09-23 11:23:02 : main.py : main : 21 - 매매 구간 돌입
+[DEBUG] 2024-09-23 11:23:04 : llm_service.py : llm_service : 75 - {'reason': '현재 가격이 이동 평균선(sma20, sma60, sma120)보다 높은 상태이며, 전체적으로 상승 추세를 보이고 있습니다. 하지만 최근에 하락세를 나타내고 있는 상황이므로 매수 타이밍이 아닌 것으로 판단됩니다.', 'result': 'HOLD'}

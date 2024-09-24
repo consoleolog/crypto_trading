@@ -1,0 +1,9 @@
+[DEBUG] 2024-09-24 14:52:52 : crypto_service.py : crypto_service : 56 - {'uuid': '4d09f1b7-059b-4370-9bb3-8dfbf2b580b8', 'side': 'ask', 'ord_type': 'market', 'state': 'wait', 'market': 'KRW-BTC', 'created_at': '2024-09-24T14:52:53+09:00', 'volume': '0.00007108', 'remaining_volume': '0.00007108', 'reserved_fee': '0', 'remaining_fee': '0', 'paid_fee': '0', 'locked': '0.00007108', 'executed_volume': '0', 'trades_count': 0}
+[DEBUG] 2024-09-24 14:52:52 : main.py : main : 15 - {'uuid': '4d09f1b7-059b-4370-9bb3-8dfbf2b580b8', 'side': 'ask', 'ord_type': 'market', 'state': 'wait', 'market': 'KRW-BTC', 'created_at': '2024-09-24T14:52:53+09:00', 'volume': '0.00007108', 'remaining_volume': '0.00007108', 'reserved_fee': '0', 'remaining_fee': '0', 'paid_fee': '0', 'locked': '0.00007108', 'executed_volume': '0', 'trades_count': 0, 'market_price': 84419000.0, 'price': 0}
+[DEBUG] 2024-09-24 14:52:53 : crypto_service.py : crypto_service : 107 - 
+    현재가 : 84419000.0
+    단기 : 84397527.0
+    중기 : 84382828.0
+    장기 : 84370766.0
+[INFO] 2024-09-24 14:52:53 : main.py : main : 58 - stage1
+[INFO] 2024-09-24 14:52:53 : main.py : main : 69 - 매도 구간 돌입
