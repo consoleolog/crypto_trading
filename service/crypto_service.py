@@ -34,7 +34,7 @@ def do_buy(ticker, amount, price):
     try:
         if amount == 0:
             msg = upbit.buy_market_order(f"KRW-{ticker}", price)
-            if msg is None:
+            if msg == None:
                 return "ALREADY_BUY"
             if isinstance(msg, dict):
                 msg['market_price'] = pyupbit.get_current_price(f"KRW-{ticker}")

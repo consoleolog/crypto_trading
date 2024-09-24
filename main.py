@@ -47,7 +47,7 @@ def main(df):
         amount = get_balances(ticker)
         b_result = do_buy(ticker, amount, 6000)
         log.debug(b_result)
-        if b_result != "ALREADY_BUY" or b_result is not None:
+        if b_result != "ALREADY_BUY" or b_result != None:
             send_mail("매수 결과")
     else:
         pass
