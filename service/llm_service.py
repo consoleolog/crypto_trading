@@ -35,21 +35,21 @@ def decision_buy_or_sell(data):
             example output :
             
             {{{{
-            reason: 
+            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "SELL"
             }}}}
             
             {{{{
-            reason: 
+            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "BUY"
             }}}}
             
             {{{{
-            reason: 
+            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "HOLD"
