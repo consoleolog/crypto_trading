@@ -77,19 +77,19 @@ while True:
 
         log.info(stage)
 
-        if stage == "stage4" or stage == "stage5" or stage == "stage6":
-            macd_b_result = get_macd_gradient_for_buy(df)
-            log.info(macd_b_result)
-            if macd_b_result == "BUY_TRUE":
-                log.info("매수 신호")
-                main(df)
-
-        if stage == "stage2" or stage == "stage3":
-            macd_s_result = get_macd_gradient_for_sell(df)
-            log.info(macd_s_result)
-            if macd_s_result == "SELL_TRUE":
-                log.info("매도 신호")
-                main(df)
+        # if stage == "stage4" or stage == "stage5" or stage == "stage6":
+        #     macd_b_result = get_macd_gradient_for_buy(df)
+        #     log.info(macd_b_result)
+        #     if macd_b_result == "BUY_TRUE":
+        #         log.info("매수 신호")
+        #         main(df)
+        #
+        # if stage == "stage2" or stage == "stage3":
+        #     macd_s_result = get_macd_gradient_for_sell(df)
+        #     log.info(macd_s_result)
+        #     if macd_s_result == "SELL_TRUE":
+        #         log.info("매도 신호")
+        #         main(df)
 
         if stage == "stage1" :
             macd_b_result = get_macd_gradient_for_buy(df)
