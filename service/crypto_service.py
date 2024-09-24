@@ -41,6 +41,8 @@ def do_buy(ticker, amount, price):
                 crypto_repository.save_buy_or_sell_history("BUY", msg)
                 return msg
             return msg
+        else:
+            return "ALREADY_BUY"
     except Exception as e:
         raise
 
@@ -94,9 +96,10 @@ def get_sma_data(ticker, interval, count):
 def get_gradient(value, rolling):
     return (value.iloc[-2].astype(int) - value.iloc[-1].astype(int)) / rolling
 
-def get_stage(price, short, middle, long):
+def get_stage(price, short, middle, long, df):
     """
     현재 스테이지 반환하는 함수
+    :param df:
     :param price: int
     :param short: int
     :param middle: int
@@ -108,7 +111,11 @@ def get_stage(price, short, middle, long):
     현재가 : {price}
     단기 : {short}
     중기 : {middle}
-    장기 : {long}""")
+    장기 : {long}
+    MACD (하) : {df['macd_10_20_slope'].iloc[-1]}
+    MACD (중) : {df['macd_10_60_slope'].iloc[-1]}
+    MACD (상) : {df['macd_20_60_slope'].iloc[-1]}
+    """)
 
     if short >= middle >= long:  # 단 중 장
         return "stage1"

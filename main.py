@@ -15,10 +15,10 @@ last_send_time = datetime.now()
 
 ticker = "BTC"
 
-def main(df):
-    df['date'] = df.apply(lambda row: f"date : {row['date']}", axis=1)
+def main(dataframe):
+    dataframe['date'] = dataframe.apply(lambda row: f"date : {row['date']}", axis=1)
 
-    loader = DataFrameLoader(df, page_content_column="date")
+    loader = DataFrameLoader(dataframe, page_content_column="date")
 
     data = loader.load()
 
@@ -57,17 +57,23 @@ while True:
     try :
         df = get_ema_data(ticker=ticker, interval="minute5",count=240)
 
-        stage = get_stage(df['close'].iloc[-1],df['ema10'].iloc[-1], df['ema20'].iloc[-1], df['ema60'].iloc[-1])
+        stage = get_stage(df['close'].iloc[-1],df['ema10'].iloc[-1], df['ema20'].iloc[-1], df['ema60'].iloc[-1], df)
 
         log.info(stage)
 
-        if (stage == "stage4" or stage == "stage5" or stage == "stage6") and get_macd_gradient_for_sell(df) == "BUY_TRUE":
-            log.info("매수 신호")
-            main(df)
+        if stage == "stage4" or stage == "stage5" or stage == "stage6":
+            macd_b_result = get_macd_gradient_for_buy(df)
+            log.info(macd_b_result)
+            if macd_b_result == "BUY_TRUE":
+                log.info("매수 신호")
+                main(df)
 
         if (stage == "stage1" or stage == "stage2" or stage == "stage3") and get_macd_gradient_for_sell(df) == "SELL_TRUE":
-            log.info("매도 신호")
-            main(df)
+            macd_s_result = get_macd_gradient_for_sell(df)
+            log.info(macd_s_result)
+            if macd_s_result == "SELL_TRUE":
+                log.info("매도 신호")
+                main(df)
 
         current_time = datetime.now()
 
