@@ -38,7 +38,8 @@ def main(df):
             if c_result['result'] == "SELL":
                 s_result = do_sell(ticker, amount)
                 log.debug(s_result)
-                send_mail("매매 결과")
+                if s_result != "ALREADY_SELL":
+                    send_mail("매도 결과")
             else:
                 pass
 
@@ -46,7 +47,8 @@ def main(df):
         amount = get_balances(ticker)
         b_result = do_buy(ticker, amount, 6000)
         log.debug(b_result)
-        send_mail("매수 결과")
+        if b_result != "ALREADY_BUY" or b_result is not None:
+            send_mail("매수 결과")
     else:
         pass
 
@@ -71,14 +73,16 @@ while True:
         if stage == "stage4" or stage == "stage5" and get_macd_gradient_for_sell(df) == "BUY_TRUE":
             log.info("매수 신호")
             amount = get_balances(ticker)
-            do_sell(ticker, amount)
-            send_mail("매수 결과")
+            b_result = do_buy(ticker, amount, 6000)
+            if b_result != "ALREADY_BUY":
+                send_mail("매수 결과")
 
         if stage == "stage2" or stage == "stage3" and get_macd_gradient_for_sell(df) == "SELL_TRUE":
             log.info("매도 신호")
             amount = get_balances(ticker)
-            do_buy(ticker, amount, 6000)
-            send_mail("매도 결과")
+            s_result = do_sell(ticker, amount)
+            if s_result != "ALREADY_SELL":
+                send_mail("매도 결과")
 
         # 1시간마다 send_mail() 호출
         current_time = datetime.now()
