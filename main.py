@@ -68,7 +68,7 @@ while True:
                 log.info("매수 신호")
                 main(df)
 
-        if (stage == "stage2" or stage == "stage3") and get_macd_gradient_for_sell(df) == "SELL_TRUE":
+        if stage == "stage2" or stage == "stage3":
             macd_s_result = get_macd_gradient_for_sell(df)
             log.info(macd_s_result)
             if macd_s_result == "SELL_TRUE":
