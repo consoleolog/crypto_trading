@@ -86,4 +86,4 @@ while True:
         log.error(e)
         pass
 
-    time.sleep(300)
+    time.sleep(60)
