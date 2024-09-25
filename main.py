@@ -117,7 +117,7 @@ while True:
             #                #
             ==================
             """)
-            main(result['df'])
+            main(stage_result['df'])
         else :
             pass
 
