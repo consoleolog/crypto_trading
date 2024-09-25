@@ -12,6 +12,8 @@ from service.mail_service import send_mail, send_log_file
 
 from datetime import datetime, timedelta
 
+from logger import log
+
 # 이전에 실행한 시간을 저장할 변수 초기화
 last_send_time = datetime.now()
 
