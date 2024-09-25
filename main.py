@@ -69,7 +69,7 @@ def main(dataframe):
         b_result = do_buy(ticker, amount, 6000)
 
         log.debug("==============================================")
-        log.debug("** 매도 결과 **")
+        log.debug("** 매수 결과 **")
         log.debug(b_result)
         log.debug("==============================================")
 
