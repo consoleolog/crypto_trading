@@ -11,3 +11,6 @@ NAVER_PASSWORD=os.getenv('NAVER_PASSWORD')
 SMTP_FROM=os.getenv('SMTP_FROM')
 SMTP_TO=os.getenv('SMTP_TO')
 TICKER=os.getenv('TICKER')
+
+LOG_DIR=f"{os.getcwd()}/logs"
+DATA_DIR=f"{os.getcwd()}/data"

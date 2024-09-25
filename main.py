@@ -17,12 +17,12 @@ last_send_time = datetime.now()
 
 ticker = TICKER
 
-log_dir = "./logs/crypto.log"
-data_dir = "./data"
+log_file = f"{LOG_DIR}/crypto.log"
+data_dir = DATA_DIR
 
 def refresh_file():
     try :
-        os.remove(log_dir)
+        os.remove(log_file)
     except Exception:
         pass
     for f in os.listdir(data_dir):
