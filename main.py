@@ -48,21 +48,20 @@ def main(dataframe):
             pass
         else:
             latest_history = crypto_repository.get_latest_buy_history()
-            c_result = compare_with_mine(latest_history, pyupbit.get_current_price(f"KRW-{ticker}"))
-            log.info(c_result['result'])
+            if latest_history != "None":
+                c_result = compare_with_mine(latest_history, pyupbit.get_current_price(f"KRW-{ticker}"))
+                log.info(c_result['result'])
 
-            if c_result['result'] == "PROFIT":
-                s_result = do_sell(ticker, amount)
+                if c_result['result'] == "PROFIT":
+                    s_result = do_sell(ticker, amount)
 
-                log.debug("==============================================")
-                log.debug("** 매도 결과 **")
-                log.debug(s_result)
-                log.debug("==============================================")
+                    log.debug("==============================================")
+                    log.debug("** 매도 결과 **")
+                    log.debug(s_result)
+                    log.debug("==============================================")
 
-                if s_result != "ALREADY_SELL":
-                    send_mail("매도 결과")
-            else:
-                pass
+                    if s_result != "ALREADY_SELL":
+                        send_mail("매도 결과")
 
     elif d_result['result'] == "BUY":
         amount = get_balances(ticker)

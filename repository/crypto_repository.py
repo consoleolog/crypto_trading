@@ -35,6 +35,9 @@ def get_buy_history():
 
 def get_latest_buy_history():
     import pandas as pd
-    data = pd.read_csv('./data/crypto_buy_history.csv', encoding='utf-8')
-    latest_history = data.iloc[-1, 3]
-    return latest_history
+    try :
+        data = pd.read_csv('./data/crypto_buy_history.csv', encoding='utf-8')
+        latest_history = data.iloc[-1, 3]
+        return latest_history
+    except Exception:
+        return "None"
