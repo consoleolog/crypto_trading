@@ -115,7 +115,7 @@ while True:
             #                #
             ==================
             """)
-            main(stage_result['data'])
+            main(stage_result['data'].tail(n=10))
 
         elif result['result'] == "SELL_TRUE":
             log.info(f"""
@@ -125,7 +125,7 @@ while True:
             #                #
             ==================
             """)
-            main(stage_result['data'])
+            main(stage_result['data'].tail(n=10))
         else :
             pass
 
@@ -149,4 +149,4 @@ while True:
         log.error("=========================================")
         pass
 
-    time.sleep(120)
+    time.sleep(60)
