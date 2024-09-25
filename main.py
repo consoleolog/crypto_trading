@@ -107,7 +107,7 @@ while True:
             #                #
             ==================
             """)
-            main(result['df'])
+            main(stage_result['df'])
 
         elif result['result'] == "SELL_TRUE":
             log.info(f"""
