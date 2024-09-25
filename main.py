@@ -43,6 +43,10 @@ def main(dataframe):
         amount = get_balances(ticker)
 
         if amount == 0:
+            log.debug("==============================================")
+            log.debug("** 매수 결과 **")
+            log.debug("ALREADY_SELL")
+            log.debug("==============================================")
             pass
         else:
             latest_history = crypto_repository.get_latest_buy_history()
@@ -63,15 +67,22 @@ def main(dataframe):
 
     elif d_result['result'] == "BUY":
         amount = get_balances(ticker)
-        b_result = do_buy(ticker, amount, 6000)
 
-        log.debug("==============================================")
-        log.debug("** 매수 결과 **")
-        log.debug(b_result)
-        log.debug("==============================================")
+        if amount != 0:
+            b_result = do_buy(ticker, amount, 6000)
 
-        if b_result != "ALREADY_BUY" and b_result != None and b_result != "None" :
-            send_mail("매수 결과")
+            log.debug("==============================================")
+            log.debug("** 매수 결과 **")
+            log.debug(b_result)
+            log.debug("==============================================")
+
+            if b_result != "ALREADY_BUY" and b_result != None and b_result != "None" :
+                send_mail("매수 결과")
+        else :
+            log.debug("==============================================")
+            log.debug("** 매수 결과 **")
+            log.debug("ALREADY_BUY")
+            log.debug("==============================================")
     else:
         pass
 
@@ -138,4 +149,4 @@ while True:
         log.error("=========================================")
         pass
 
-    time.sleep(100)
+    time.sleep(120)

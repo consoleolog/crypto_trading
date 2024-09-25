@@ -1,7 +1,6 @@
 def save_crypto_history(df):
   with open('./data/crypto_history.csv', 'a', encoding='utf-8') as f:
-      f.write(f"""\n{df['date'].iloc[-1]}, {df['close'].iloc[-1]}, {df['ema10'].iloc[-1]}, {df['ema20'].iloc[-1]}, {df['ema60'].iloc[-1]}, {df['macd_10_20'].iloc[-1]}, {df['macd_10_60'].iloc[-1]}, {df['macd_20_60'].iloc[-1]} , {df['close_slope'].iloc[-1]}, {df['ema10_slope'].iloc[-1]}, {df['ema20_slope'].iloc[-1]}, {df['ema60_slope'].iloc[-1]} , {df['macd_10_20_slope'].iloc[-1]}, {df['macd_10_60_slope'].iloc[-1]}, {df['macd_20_60_slope'].iloc[-1]}
-""")
+      f.write(f"""\n{df['date'].iloc[-1]}, {df['close'].iloc[-1]}, {df['ema10'].iloc[-1]}, {df['ema20'].iloc[-1]}, {df['ema60'].iloc[-1]}, {df['macd_10_20'].iloc[-1]}, {df['macd_10_60'].iloc[-1]}, {df['macd_20_60'].iloc[-1]} , {df['close_slope'].iloc[-1]}, {df['ema10_slope'].iloc[-1]}, {df['ema20_slope'].iloc[-1]}, {df['ema60_slope'].iloc[-1]} , {df['macd_10_20_slope'].iloc[-1]}, {df['macd_10_60_slope'].iloc[-1]}, {df['macd_20_60_slope'].iloc[-1]}""")
       f.close()
 
 
