@@ -35,21 +35,21 @@ def decision_buy_or_sell(data):
             example output :
             
             {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
+            reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "SELL"
             }}}}
             
             {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
+            reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "BUY"
             }}}}
             
             {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
+            reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "HOLD"
@@ -60,21 +60,21 @@ def decision_buy_or_sell(data):
             example output :
             
             {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
+            reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "SELL"
             }}}}
             
             {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
+            reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "BUY"
             }}}}
             
             {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
+            reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "HOLD"
@@ -107,17 +107,17 @@ def decision_buy_or_sell(data):
 def compare_with_mine(my_balance, market_balance):
     template = ChatPromptTemplate.from_messages([
         ("system",""" 수수료가 0.05% 일 때 현재 내가 가지고있는 암호화폐를 팔면 손실 : LOSS 이 발생하는지 이익 : PROFIT 이 발생하는지 알려줘
-            이유를 말할 때에는 정확인 숫자의 수치를 포함해서 말해줘  
+            이유를 말할 때에는 정확한 숫자의 수치를 포함해서 말해줘  
             example output :
             {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
+            reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "NOT_SELL"
             }}}}
             
             {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
+            reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "SELL"
@@ -125,17 +125,17 @@ def compare_with_mine(my_balance, market_balance):
         """),
         ("ai","""
             답변을 할 때는 json 형태로 답변해줘
-            이유를 말할 때에는 정확인 숫자의 수치를 포함해서 말해줘  
+            이유를 말할 때에는 정확한 숫자의 수치를 포함해서 말해줘  
             example output :
             {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
+            reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "LOSS"
             }}}}
             
             {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
+            reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
                 result: "PROFIT"
