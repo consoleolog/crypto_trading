@@ -107,7 +107,7 @@ while True:
             #                #
             ==================
             """)
-            main(stage_result['df'])
+            main(stage_result['data'])
 
         elif result['result'] == "SELL_TRUE":
             log.info(f"""
@@ -117,7 +117,7 @@ while True:
             #                #
             ==================
             """)
-            main(stage_result['df'])
+            main(stage_result['data'])
         else :
             pass
 
