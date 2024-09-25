@@ -23,10 +23,6 @@ log_file = f"{LOG_DIR}/crypto.log"
 data_dir = DATA_DIR
 
 def refresh_file():
-    try :
-        os.remove(log_file)
-    except Exception:
-        pass
     for f in os.listdir(data_dir):
         if f.endswith('.csv'):
             fp = os.path.join(data_dir, f)
