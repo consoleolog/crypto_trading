@@ -17,19 +17,19 @@ last_send_time = datetime.now()
 
 ticker = TICKER
 
-log_dir = "./logs"
+log_dir = "./logs/crypto.log"
 data_dir = "./data"
-for file in os.listdir(log_dir):
-    file_path = os.path.join(log_dir, file)
-    if os.path.isfile(file_path):
-        os.remove(file_path)
-for filename in os.listdir(data_dir):
-    if filename.endswith('.csv'):
-        file_path = os.path.join(data_dir, filename)
 
-        empty_df = pd.DataFrame(columns=pd.read_csv(file_path).columns)
-
-        empty_df.to_csv(file_path, index=False)
+def refresh_file():
+    try :
+        os.remove(log_dir)
+    except Exception:
+        pass
+    for f in os.listdir(data_dir):
+        if f.endswith('.csv'):
+            fp = os.path.join(data_dir, f)
+            ed = pd.DataFrame(columns=pd.read_csv(fp).columns)
+            ed.to_csv(fp, index=False)
 
 def main(dataframe):
     dataframe['date'] = dataframe.apply(lambda row: f"date : {row['date']}", axis=1)
@@ -51,9 +51,14 @@ def main(dataframe):
             c_result = compare_with_mine(latest_history, pyupbit.get_current_price(f"KRW-{ticker}"))
             log.info(c_result['result'])
 
-            if c_result['result'] == "SELL":
+            if c_result['result'] == "PROFIT":
                 s_result = do_sell(ticker, amount)
+
+                log.debug("==============================================")
+                log.debug("** 매도 결과 **")
                 log.debug(s_result)
+                log.debug("==============================================")
+
                 if s_result != "ALREADY_SELL":
                     send_mail("매도 결과")
             else:
@@ -62,74 +67,78 @@ def main(dataframe):
     elif d_result['result'] == "BUY":
         amount = get_balances(ticker)
         b_result = do_buy(ticker, amount, 6000)
+
+        log.debug("==============================================")
+        log.debug("** 매도 결과 **")
         log.debug(b_result)
+        log.debug("==============================================")
+
         if b_result != "ALREADY_BUY" and b_result != None and b_result != "None" :
             send_mail("매수 결과")
     else:
         pass
 
+# 처음 시작시 파일 초기화
+refresh_file()
+
 while True:
 
     try :
-        df = get_ema_data(ticker=ticker, interval="minute5",count=240)
+        df = get_ema_data(ticker=ticker, interval="day",count=120)
 
-        stage = get_stage(df['close'].iloc[-1],df['ema10'].iloc[-1], df['ema20'].iloc[-1], df['ema60'].iloc[-1], df)
+        stage_result = get_stage(df)
+        stage = stage_result['stage']
 
-        log.info(stage)
+        log.info(f"""
+        ==================
+        #                #
+        #     {stage}     #
+        #                #
+        ==================
+        """)
 
-        # if stage == "stage4" or stage == "stage5" or stage == "stage6":
-        #     macd_b_result = get_macd_gradient_for_buy(df)
-        #     log.info(macd_b_result)
-        #     if macd_b_result == "BUY_TRUE":
-        #         log.info("매수 신호")
-        #         main(df)
-        #
-        # if stage == "stage2" or stage == "stage3":
-        #     macd_s_result = get_macd_gradient_for_sell(df)
-        #     log.info(macd_s_result)
-        #     if macd_s_result == "SELL_TRUE":
-        #         log.info("매도 신호")
-        #         main(df)
+        result = decision_using_stage(stage, df)
 
-        if stage == "stage1" :
-            macd_b_result = get_macd_gradient_for_buy(df)
-            if macd_b_result == "BUY_TRUE":
-                log.info(macd_b_result)
-                log.info("매수 신호")
-                main(df)
-            else :
-                macd_s_result = get_macd_gradient_for_sell(df)
-                log.info(macd_s_result)
-                if macd_s_result == "SELL_TRUE":
-                    log.info("매도 신호")
-                    main(df)
+        if result['result'] == "BUY_TRUE":
+            log.info(f"""
+            ==================
+            #                #
+            #   매수 신호    #
+            #                #
+            ==================
+            """)
+            main(result['df'])
+
+        elif result['result'] == "SELL_TRUE":
+            log.info(f"""
+            ==================
+            #                #
+            #   매도 신호    #
+            #                #
+            ==================
+            """)
+            main(result['df'])
+        else :
+            pass
 
 
         current_time = datetime.now()
 
-        # 12시간마다 로그 파일 , 데이터 파일 초기화
+        # 3 시간마다 로그 파일 , 데이터 파일 초기화
         if current_time - last_send_time >= timedelta(hours=3):
             log.debug("로그 파일 초기화")
             send_log_file("로그 파일 초기화 전 백업")
-            for file in os.listdir(log_dir):
-                file_path = os.path.join(log_dir, file)
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
-
             send_mail("데이터 파일 초기화 전 백업")
 
-            for filename in os.listdir(data_dir):
-                if filename.endswith('.csv'):
-                    file_path = os.path.join(data_dir, filename)
+            refresh_file()
 
-                    empty_df = pd.DataFrame(columns=pd.read_csv(file_path).columns)
-
-                    empty_df.to_csv(file_path, index=False)
             # 마지막으로 메일을 보낸 시간을 업데이트
             last_send_time = current_time
 
     except Exception as e:
+        log.error("=========================================")
         log.error(e)
+        log.error("=========================================")
         pass
 
     time.sleep(100)

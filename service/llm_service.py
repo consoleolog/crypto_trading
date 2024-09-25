@@ -88,7 +88,14 @@ def decision_buy_or_sell(data):
         result = chain.invoke({
             "data":data
         })
-        log.debug(result['reason'])
+        log.debug(f"""
+        ==============================================================================================================================
+        ##  ** 매매 분석 **
+        ## 
+        ##  {result['reason']}
+        ##
+        ==============================================================================================================================
+        """)
         return result
     except Exception as e:
         log.error(e)
@@ -99,7 +106,7 @@ def decision_buy_or_sell(data):
 
 def compare_with_mine(my_balance, market_balance):
     template = ChatPromptTemplate.from_messages([
-        ("system",""" 수수료가 0.05% 일 때 현재 내가 가지고있는 암호화폐를 팔면 손실 : NOT_SELL 이 발생하는지 이익 : SELL 이 발생하는지 알려줘
+        ("system",""" 수수료가 0.05% 일 때 현재 내가 가지고있는 암호화폐를 팔면 손실 : LOSS 이 발생하는지 이익 : PROFIT 이 발생하는지 알려줘
             이유를 말할 때에는 정확인 숫자의 수치를 포함해서 말해줘  
             example output :
             {{{{
@@ -124,14 +131,14 @@ def compare_with_mine(my_balance, market_balance):
             reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
-                result: "NOT_SELL"
+                result: "LOSS"
             }}}}
             
             {{{{
             reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
-                result: "SELL"
+                result: "PROFIT"
             }}}}
         """),
         ("human",""" 구매할때의 암호화폐 가격 : {myBalance} (6010원 만큼 매수) 
@@ -145,7 +152,14 @@ def compare_with_mine(my_balance, market_balance):
             "myBalance": my_balance,
             "marketBalance": market_balance
         })
-        log.debug(result['reason'])
+        log.debug(f"""
+        ==============================================================================================================================
+        ##  ** 내 가격과 현재 시장 가격 비교 **
+        ## 
+        ##  {result['reason']}
+        ##
+        ==============================================================================================================================
+        """)
         return result
     except Exception as e:
         log.error(e)
@@ -153,52 +167,4 @@ def compare_with_mine(my_balance, market_balance):
         return error_chain.invoke({
             "myBalance": my_balance,
             "marketBalance": market_balance
-        })
-
-def analyze_macd_gradient(data):
-    template = ChatPromptTemplate.from_messages([
-        ("system",""" 너는 암호화폐 전문가야
-                    macd의 기울기를 분석해서 매수(BUY)할지 매도할지(SELL) 결정해줘 
-        매수신호 : macd의 기울기가 어느정도의 시간동안 음수의 값을 가지다가 양수의 값으로 전환될 때
-        매도 신호 : macd의 기울기가 어느정도의 시간동안 양수의 값을 가지다가 음수의 값으로 전환될 때
-                    답변을 할 때는 json 형식으로 답변해줘
-                    """),
-        ("ai","""
-            답변을 할 때는 json 형식으로 답변해줘
-            example output :
-            {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
-            }},
-            {{
-                result: "BUY"
-            }}}}
-            
-            {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
-            }},
-            {{
-                result: "SELL"
-            }}}}
-            
-            {{{{
-            reason: "이유를 말할때에는 정확인 숫자의 수치를 포함해서 말해줘 "
-            }},
-            {{
-                result: "HOLD"
-            }}}}
-        """),
-        ("human","{data}")
-    ])
-    chain = template | model | SimpleJsonOutputParser()
-    try:
-        result = chain.invoke({
-            "data": data
-        })
-        log.debug(result['reason'])
-        return result
-    except Exception as e:
-        log.error(e)
-        error_chain = template | model | JsonOutputParser()
-        return error_chain.invoke({
-            "data": data
         })

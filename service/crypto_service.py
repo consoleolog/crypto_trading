@@ -44,6 +44,7 @@ def do_buy(ticker, amount, price):
         else:
             return "ALREADY_BUY"
     except Exception as e:
+        log.error(e)
         raise
 
 def do_sell(ticker, amount):
@@ -65,137 +66,94 @@ def do_sell(ticker, amount):
             return msg
         return msg
     except Exception as e:
+        log.error(e)
         raise
-
-
-def get_sma_data(ticker, interval, count):
-    """
-    종목 코드, 기간, 양의 따라 데이터 반환
-    :param ticker: 종목 코드
-    :param interval: 얼마만큼의 기간인지
-    :param count: 얼마만큼 가져올건지
-    :return: DataFrame
-    """
-
-    data = pyupbit.get_ohlcv(ticker=f"KRW-{ticker}", interval=interval, count=count)
-
-    data['sma20'] = data['close'].rolling(20).mean().dropna().astype(int)
-    data['sma60'] = data['close'].rolling(60).mean().dropna().astype(int)
-    data['sma120'] = data['close'].rolling(120).mean().dropna().astype(int)
-
-    data = data.reset_index()
-    data.rename(columns={'index':'date'}, inplace=True)
-
-    data.drop(['open', 'high', 'low', 'volume', 'value'], axis=1, inplace=True)
-    data.dropna(inplace=True)
-
-    crypto_repository.save_crypto_history(data)
-    return data
 
 
 def get_gradient(value, rolling):
     return (value.iloc[-2].astype(int) - value.iloc[-1].astype(int)) / rolling
 
-def get_stage(price, short, middle, long, df):
+def get_stage(df):
     """
     현재 스테이지 반환하는 함수
-    :param df:
-    :param price: int
-    :param short: int
-    :param middle: int
-    :param long: int
-    :return: str
     """
+    df['close_slope'] = df['close'].diff()
+
+    df['ema10_slope'] = df['ema10'].diff()
+    df['ema20_slope'] = df['ema20'].diff()
+    df['ema60_slope'] = df['ema60'].diff()
+
+    df['macd_10_20'] = df['ema10'] - df['ema20']
+    df['macd_10_60'] = df['ema10'] - df['ema60']
+    df['macd_20_60'] = df['ema20'] - df['ema60']
+
+    df['macd_10_20_slope'] = df['macd_10_20'].diff()
+    df['macd_10_60_slope'] = df['macd_10_60'].diff()
+    df['macd_20_60_slope'] = df['macd_20_60'].diff()
+
+    short = df['ema10'].iloc[-1]
+    middle = df['ema20'].iloc[-1]
+    long = df['ema60'].iloc[-1]
 
     log.debug(f"""
-    현재가 : {price}
-    단기 : {short}
-    중기 : {middle}
-    장기 : {long}
-    MACD (하) : {df['macd_10_20_slope'].iloc[-1]}
-    MACD (중) : {df['macd_10_60_slope'].iloc[-1]}
-    MACD (상) : {df['macd_20_60_slope'].iloc[-1]}
+    ================================================= 
+    ## ** 단순 가격 **                                               
+    ## 현재가 : {df['close'].iloc[-1]}                         
+    ## 단기 : {short}                                         
+    ## 중기 : {middle}                                    
+    ## 장기 : {long}                                              
+    ## MACD (하) : {df['macd_10_20'].iloc[-1]}                
+    ## MACD (중) : {df['macd_10_60'].iloc[-1]}        
+    ## MACD (상) : {df['macd_20_60'].iloc[-1]}           
+    ================================================= 
+    ## ** 기울기 **                                            
+    ## 현재가 : {df['close_slope'].iloc[-1]}               
+    ## 단기 : {df['ema10_slope'].iloc[-1]}                
+    ## 중기 : {df['ema20_slope'].iloc[-1]}                
+    ## 장기 : {df['ema60_slope'].iloc[-1]}                
+    ## MACD (하) : {df['macd_10_20_slope'].iloc[-1]}      
+    ## MACD (중) : {df['macd_10_60_slope'].iloc[-1]}     
+    ## MACD (상) : {df['macd_20_60_slope'].iloc[-1]}    
+    =================================================    
     """)
 
-    if short >= middle >= long:  # 단 중 장
-        return "stage1"
-    elif middle >= short >= long:  # 중 단 장
-        return "stage2"
-    elif middle >= long >= short:  # 중 장 단
-        return "stage3"
-    elif long >= middle >= short:  # 장  중 단
-        return "stage4"
-    elif long >= short >= middle:  # 장 단 중
-        return "stage5"
-    elif short >= long >= middle:  # 단 장 중
-        return "stage6"
-
-def calculate_slope(y1, y2, x):
-    slope = (y2 - y1) / x
-    return slope
-
-def get_crypto_slope(df):
-    close_y1 = df['close'].iloc[-1]
-    close_y2 = df['close'].iloc[-2]
-    cs = calculate_slope(close_y1, close_y2, 1)
-
-    ema10_y1 = df['ema10'].iloc[-1]
-    ema10_y2 = df['ema10'].iloc[-2]
-    e10s = calculate_slope(ema10_y1, ema10_y2, 20)
-
-    ema20_y1 = df['ema20'].iloc[-1]
-    ema20_y2 = df['ema20'].iloc[-2]
-    e20s = calculate_slope(ema20_y1, ema20_y2, 60)
-
-    ema60_y1 = df['ema60'].iloc[-1]
-    ema60_y2 = df['ema60'].iloc[-2]
-    e60s = calculate_slope(ema60_y1, ema60_y2, 120)
-
-    return cs, e10s, e20s, e60s
-
-def calculate_status(df):
-    close = df['close'].iloc[-1]
-
-    cs, short, middle, long = get_crypto_slope(df)
-
-    log.debug(f"""
-    현재가 : {cs}
-    단기 : {short}
-    중기 : {middle}
-    장기 : {long}""")
+    crypto_repository.save_crypto_history(df)
 
     if short >= middle >= long:  # 단 중 장
-        log.info(f" stage1 : {close} 안정하게 상승 중.")
-        return "stage1"
-
+        return {
+            "stage": "stage1",
+            "data" : df
+        }
     elif middle >= short >= long:  # 중 단 장
-        log.info(f" stage1 : {close} 안정하게 상승 중.")
-        return "stage2"
-
+        return {
+            "stage": "stage2",
+            "data": df
+        }
     elif middle >= long >= short:  # 중 장 단
-        log.info(f" stage3 : {close} 하락 추세의 시작. ")
-        return "stage3"
-
+        return {
+            "stage": "stage3",
+            "data": df
+        }
     elif long >= middle >= short:  # 장  중 단
-        log.info(f" stage4 : {close} 안정하게 하락 중. ")
-        return "stage4"
-
+        return {
+            "stage": "stage4",
+            "data": df
+        }
     elif long >= short >= middle:  # 장 단 중
-        log.info(f" stage5 : {close} 하락 추세의 끝. ")
-        return "stage5"
-
+        return {
+            "stage": "stage5",
+            "data": df
+        }
     elif short >= long >= middle:  # 단 장 중
-        log.info(f" stage6 : {close} 상승 추세의 시작. ")
-        return "stage6"
+        return {
+            "stage": "stage6",
+            "data": df
+        }
+
+
 
 def get_ema_data(ticker, interval, count):
     """
-    macd의 기울기가 양수일때 감소하면 매도에 점점 가까워지는거고
-    macd의 기울기가 음수일때 증가하면 매수에 점점 가까줘지는거임
-
-    매수 신호 : macd의 기울기가 어느정도의 시간동안 음수의 값을 가지다가 양수의 값으로 전환될 때
-    매도 신호 : macd의 기울기가 어느정도의 시간동안 양수의 값을 가지다가 음수의 값으로 전환될 때
-
     :param count:
     :param interval:
     :param ticker: str
@@ -210,49 +168,113 @@ def get_ema_data(ticker, interval, count):
     data['macd_10_60'] = data['ema10'] - data['ema60']
     data['macd_20_60'] = data['ema20'] - data['ema60']
 
-    data['macd_10_20_slope'] = data['macd_10_20'].diff()
-    data['macd_10_60_slope'] = data['macd_10_60'].diff()
-    data['macd_20_60_slope'] = data['macd_20_60'].diff()
-
     data = data.reset_index()
     data.rename(columns={'index':'date'}, inplace=True)
 
     data.drop(['open','high','low','volume','value'], axis=1, inplace=True)
     data.dropna(inplace=True)
 
-    crypto_repository.save_crypto_history(data)
     return data
 
-def get_macd_gradient_for_buy(df):
-    # if df['macd_10_20_slope'].iloc[-1] > 0 and df['macd_10_20_slope'].iloc[-2] > 0 and df['macd_10_20_slope'].iloc[-3] > 0:
-    #     if df['macd_10_60_slope'].iloc[-1] > 0 and df['macd_10_60_slope'].iloc[-2] > 0 and df['macd_10_60_slope'].iloc[-3] > 0:
-    #         if df['macd_20_60_slope'].iloc[-1] > 0 and df['macd_20_60_slope'].iloc[-2] > 0 and df['macd_20_60_slope'].iloc[-3] > 0:
-    #             return "BUY_TRUE"
-    #         else:
-    #             return "BUY_FALSE"
-    #     else:
-    #         return "BUY_FALSE"
-    # else :
-    #     return "BUY_FALSE"
-    if (df['macd_10_20_slope'].iloc[-1] > 0 and df['macd_10_60_slope'].iloc[-2] > 0) and df['macd_10_60_slope'].iloc[-1] > 0 and df['macd_20_60_slope'].iloc[-1] > 0:
-        return "BUY_TRUE"
-    else :
-        return "BUY_FALSE"
+def decision_using_stage(stage, df):
 
-def get_macd_gradient_for_sell(df):
-    # if df['macd_10_20_slope'].iloc[-1] < 0 and df['macd_10_20_slope'].iloc[-2] < 0 and df['macd_10_20_slope'].iloc[-3] < 0:
-    #     if df['macd_10_60_slope'].iloc[-1] < 0 and df['macd_10_60_slope'].iloc[-2] < 0 and df['macd_10_60_slope'].iloc[-3] < 0:
-    #         if df['macd_20_60_slope'].iloc[-1] < 0 and df['macd_20_60_slope'].iloc[-2] < 0 and df['macd_20_60_slope'].iloc[-3] < 0:
-    #             return "SELL_TRUE"
-    #         else:
-    #             return "SELL_FALSE"
-    #     else:
-    #         return "SELL_FALSE"
-    # else :
-    #     return "SELL_FALSE"
-    if df['macd_10_20_slope'].iloc[-1] < 0 and df['macd_10_60_slope'].iloc[-1] < 0 and df['macd_20_60_slope'].iloc[-1] < 0:
-        return "SELL_TRUE"
+    df.to_csv('test1.csv')
+
+    ## STAGE 1 ##
+    if stage == "stage1":
+        ## 조기 매도를 고민 해야 하는 상황임 만약에 기울기가 세개가 다 우하향이면 매도각 아닐까?
+        # 우선 세개의 기울기가 다 음수 일 때
+        if ((df['macd_10_20_slope'].iloc[-1] < 0 and df['macd_10_20_slope'].iloc[-2] < 0 and df['macd_10_20_slope'].iloc[-3] < 0)
+            and (df['macd_10_60_slope'].iloc[-1] < 0 and  df['macd_10_60_slope'].iloc[-2] < 0 and  df['macd_10_60_slope'].iloc[-3] < 0)
+            and (df['macd_20_60_slope'].iloc[-1] < 0 and df['macd_20_60_slope'].iloc[-2] < 0  and df['macd_20_60_slope'].iloc[-3] < 0)):
+            return {
+                "stage": "stage1",
+                "result": "SELL_TRUE"
+            }
+        else :
+            return {
+                "stage": "stage1",
+                "result": "SELL_FALSE"
+            }
+
+    ## STAGE 2 ##
+    elif stage == "stage2":
+        if ((df['macd_10_20_slope'].iloc[-1] < 0 and df['macd_10_20_slope'].iloc[-2] < 0 and df['macd_10_20_slope'].iloc[-3] < 0 and df['macd_10_20_slope'].iloc[-4] < 0)
+            and (df['macd_10_60_slope'].iloc[-1] < 0 and df['macd_10_60_slope'].iloc[-2] < 0 and df['macd_10_60_slope'].iloc[-3] < 0 and df['macd_10_60_slope'].iloc[-4] < 0)
+            and (df['macd_20_60_slope'].iloc[-1] < 0 and df['macd_20_60_slope'].iloc[-2] < 0 and df['macd_20_60_slope'].iloc[-3] < 0 and df['macd_20_60_slope'].iloc[-4] < 0)):
+            return {
+                "stage": "stage2",
+                "result": "SELL_TRUE"
+            }
+        else :
+            return {
+                "stage": "stage2",
+                "result": "SELL_FALSE"
+            }
+
+    ## STAGE 3 ##
+    elif stage == "stage3":
+        if ((df['macd_10_20_slope'].iloc[-1] < 0 and df['macd_10_20_slope'].iloc[-2] < 0 and df['macd_10_20_slope'].iloc[-3] < 0 and df['macd_10_20_slope'].iloc[-4] < 0 and df['macd_10_20_slope'].iloc[-5] < 0)
+            and (df['macd_10_60_slope'].iloc[-1] < 0 and df['macd_10_60_slope'].iloc[-2] < 0 and df['macd_10_60_slope'].iloc[-3] < 0 and df['macd_10_60_slope'].iloc[-4] < 0 and df['macd_10_60_slope'].iloc[-5] < 0)
+            and (df['macd_20_60_slope'].iloc[-1] < 0 and df['macd_20_60_slope'].iloc[-2] < 0 and df['macd_20_60_slope'].iloc[-3] < 0 and df['macd_20_60_slope'].iloc[-4] < 0 and df['macd_20_60_slope'].iloc[-5] < 0)):
+            return {
+                "stage": "stage3",
+                "result": "SELL_TRUE"
+            }
+        else :
+            return {
+                "stage": "stage3",
+                "result": "SELL_FALSE"
+            }
+
+    ## STAGE 4 ##
+    elif stage == "stage4":
+        if ((df['macd_10_20_slope'].iloc[-1] > 0 and df['macd_10_20_slope'].iloc[-2] > 0 and df['macd_10_20_slope'].iloc[-3] > 0)
+            and (df['macd_10_60_slope'].iloc[-1] > 0 and df['macd_10_60_slope'].iloc[-2] > 0 and df['macd_10_60_slope'].iloc[-3] > 0)
+            and ( df['macd_20_60_slope'].iloc[-1] > 0 and df['macd_20_60_slope'].iloc[-2] > 0 and df['macd_20_60_slope'].iloc[-3] > 0)):
+            return {
+                "stage": "stage4",
+                "result": "BUY_TRUE"
+            }
+        else :
+            return {
+                "stage": "stage4",
+                "result": "BUY_FALSE"
+            }
+
+    ## STAGE 5 ##
+    elif stage == "stage5":
+        if ((df['macd_10_20_slope'].iloc[-1] > 0 and df['macd_10_20_slope'].iloc[-2] > 0 and df['macd_10_20_slope'].iloc[-3] > 0 and df['macd_10_20_slope'].iloc[-4] > 0)
+            and (df['macd_10_60_slope'].iloc[-1] > 0 and df['macd_10_60_slope'].iloc[-2] > 0 and df['macd_10_60_slope'].iloc[-3] > 0 and df['macd_10_60_slope'].iloc[-4] > 0)
+            and (df['macd_20_60_slope'].iloc[-1] > 0 and df['macd_20_60_slope'].iloc[-2] > 0 and df['macd_20_60_slope'].iloc[-3] > 0 and df['macd_20_60_slope'].iloc[-4] > 0)):
+            return {
+                "stage": "stage5",
+                "result": "BUY_TRUE"
+            }
+        else :
+            return {
+                "stage": "stage5",
+                "result": "BUY_FALSE"
+            }
+
+    ## STAGE 6 ##
+    elif stage == "stage6":
+        if ((df['macd_10_20_slope'].iloc[-1] > 0 and df['macd_10_20_slope'].iloc[-2] > 0 and df['macd_10_20_slope'].iloc[-3] > 0 and df['macd_10_20_slope'].iloc[-4] > 0 and df['macd_10_20_slope'].iloc[-5] > 0)
+            and (df['macd_10_60_slope'].iloc[-1] > 0 and df['macd_10_60_slope'].iloc[-2] > 0 and df['macd_10_60_slope'].iloc[-3] > 0 and df['macd_10_60_slope'].iloc[-4] > 0 and df['macd_10_60_slope'].iloc[-5] > 0)
+            and (df['macd_20_60_slope'].iloc[-1] > 0 and df['macd_20_60_slope'].iloc[-2] > 0 and df['macd_20_60_slope'].iloc[-3] > 0 and df['macd_20_60_slope'].iloc[-4] > 0 and df['macd_20_60_slope'].iloc[-5] > 0)):
+            return {
+                "stage": "stage6",
+                "result": "BUY_TRUE"
+            }
+        else :
+            return {
+                "stage": "stage6",
+                "result": "BUY_FALSE"
+            }
+
     else :
-        return "SELL_FALSE"
+        return {
+            "result": "None"
+        }
 
 
