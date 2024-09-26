@@ -14,16 +14,17 @@ def save_buy_or_sell_history(bs, df):
     fdt = dt.strftime(datefmt)
 
     try:
-        df['price']
+        df['balance']
     except KeyError as ke:
-        df['price'] = 0
+        df['locked'] = 0
+        df['balance'] = 0
 
     with open('./data/crypto_buy_sell_history.csv', 'a', encoding='utf-8') as f:
-        f.write(f"\n {fdt}, {df['market']}, {bs}, {df['price']} , {df['market_price']}")
+        f.write(f"\n {fdt}, {df['market']}, {bs}, {df['locked']} , {df['market_price']},{df['balance']}")
         f.close()
     if bs == "BUY":
         with open('./data/crypto_buy_history.csv', 'a', encoding='utf-8') as f:
-            f.write(f"\n {fdt}, {df['market']}, {df['price']} , {df['market_price']}")
+            f.write(f"\n {fdt}, {df['market']}, {df['locked']} , {df['market_price']},{df['balance']}")
             f.close()
     else:
         pass

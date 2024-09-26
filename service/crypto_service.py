@@ -38,6 +38,7 @@ def do_buy(ticker, amount, price):
                 return "ALREADY_BUY"
             if isinstance(msg, dict):
                 msg['market_price'] = pyupbit.get_current_price(f"KRW-{ticker}")
+                msg['balance'] = get_balances(ticker)
                 crypto_repository.save_buy_or_sell_history("BUY", msg)
                 return msg
             return msg
@@ -262,8 +263,8 @@ def decision_using_stage(stage):
             }
     ## STAGE 4 ##
     elif stage == "stage4":
-        if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2]) and
-            (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2]) and
+        if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3] >= df['macd_10_20_slope'].iloc[-4]) and
+            (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3] >= df['macd_10_20_slope'].iloc[-4]) and
              df['macd_20_60_slope'].iloc[-1] >= df['macd_20_60_slope'].iloc[-2]):
             return {
                 "stage": "stage4",
@@ -276,8 +277,8 @@ def decision_using_stage(stage):
             }
     ## STAGE 5 ##
     elif stage == "stage5":
-        if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3]) and
-            (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2]) and
+        if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3] >= df['macd_10_20_slope'].iloc[-4]) and
+            (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3]) and
              df['macd_20_60_slope'].iloc[-1] >= df['macd_20_60_slope'].iloc[-2]):
             return {
                 "stage": "stage5",
@@ -291,8 +292,8 @@ def decision_using_stage(stage):
     ## STAGE 6 ##
     elif stage == "stage6":
         if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3]) and
-            (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2] >= df['macd_10_60_slope'].iloc[-3]) and
-             df['macd_20_60_slope'].iloc[-1] >= df['macd_20_60_slope'].iloc[-2] >= df['macd_10_60_slope'].iloc[-3]):
+            (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3]) and
+             df['macd_20_60_slope'].iloc[-1] >= df['macd_20_60_slope'].iloc[-2] ):
             return {
                 "stage": "stage6",
                 "result": "BUY_TRUE"

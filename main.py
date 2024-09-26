@@ -35,11 +35,12 @@ def calculate_profit(amount):
     latest_buy_history = crypto_repository.get_buy_history()
     my_price = latest_buy_history['my_price']
     my_market_price = latest_buy_history['market_price']
+    my_balance = latest_buy_history['balance']
 
     current_market_price = pyupbit.get_current_price(f"KRW-{ticker}")
 
     if my_price < current_market_price:
-        compare_result = compare_with_mine(my_market_price, my_price , current_market_price)
+        compare_result = compare_with_mine(my_market_price, my_price ,my_balance, current_market_price)
         log.debug("==============================================")
         log.debug("** 수익률 분석 **")
         log.debug(compare_result['result'])
@@ -162,4 +163,4 @@ while True:
         log.error("=========================================")
         pass
 
-    time.sleep(60)
+    time.sleep(65)

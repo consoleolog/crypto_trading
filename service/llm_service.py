@@ -104,10 +104,10 @@ def decision_buy_or_sell(data):
             "data":data
         })
 
-def compare_with_mine(market_price, my_price, current_market_price):
+def compare_with_mine(market_price, my_price,my_balance, current_market_price):
     template = ChatPromptTemplate.from_messages([
         ("system",""" 수수료가 0.05% 일 때 현재 내가 가지고있는 암호화폐를 팔면 손실 : LOSS 이 발생하는지 이익 : PROFIT 이 발생하는지 알려줘
-            이익이 10원 이하면 HOLD 를 출력해줘
+            이익이 20원 이하면 HOLD 를 출력해줘
             이유를 말할 때에는 정확한 숫자의 수치를 포함해서 말해줘  
             example output :
             {{{{
@@ -133,10 +133,18 @@ def compare_with_mine(market_price, my_price, current_market_price):
         """),
         ("ai","""
             답변을 할 때는 json 형태로 답변해줘
+            이익이 20원 이하면 HOLD 를 출력해줘
             이유를 말할 때에는 정확한 숫자의 수치를 포함해서 말해줘  
             example output :
             {{{{
             reason: "구매할 때의 암호화폐 가격은 84,688,000원이었고, 현재 시장의 암호화폐 가격은 84,634,000원이므로 손실이 발생합니다. 손실액은 (84,688,000 - 84,634,000) * (6003 / 84,688,000) = 3,241.44원입니다. 이 손실액은 10원 이상입니다."
+            }},
+            {{
+                result: "LOSS"
+            }}}}
+            {{{{
+            reason: "손익 계산 시, 매수한 암호화폐의 양은 6003 / 84850000.0 = 0.0000707 BTC입니다. 현재 가치(0.0000707 BTC * 84850000.0) = 6003.00원이 됩니다. 수수료는 6003 * 0.0006 = 3.60원이므로  6003 - 3.60 = 5999.40 ,  
+                    따라서 6003 - 5999.40 < 20 이기 때문에 손실이 발생합니다."
             }},
             {{
                 result: "LOSS"
@@ -150,15 +158,18 @@ def compare_with_mine(market_price, my_price, current_market_price):
             }}}}
             
             {{{{
-            reason: "구매했을 때의 가격은 84688000.0원이었고, 현재 가격은 84622000.0원이므로 손실이 발생했습니다. 손실 금액은 (84688000.0 - 84622000.0) * (6003 / 84688000.0) = 약 4.7원입니다. 손실이 10원 이하이므로 HOLD합니다. "
+            reason: "구매했을 때의 가격은 84688000.0원이었고, 현재 가격은 84622000.0원이므로 손실이 발생했습니다. 손실 금액은 (84688000.0 - 84622000.0) * (6003 / 84688000.0) = 약 4.7원입니다. 손실이 20원 이하이므로 HOLD합니다. "
             }},
             {{
                 result: "HOLD"
             }}}}
         """),
-        ("human",""" 구매할때의 암호화폐 가격 : {marketPrice} ( {myPrice}원 만큼 매수) 
-                         
+        ("human",""" 구매한 암호화폐의 양 : {myPrice} 원으로 {myBalance} 만큼을 매수 함 
+                     구매할 당시 암호화폐 가격 : {marketPrice}    
+                        
                      현재 시장의 암호화폐 가격 : {currentMarketPrice}
+                     
+                     수수료 : 0.06%
                      """)
     ])
     chain = template | model | SimpleJsonOutputParser()
@@ -166,6 +177,7 @@ def compare_with_mine(market_price, my_price, current_market_price):
         result = chain.invoke({
             "marketPrice": market_price,
             "myPrice":my_price,
+            "myBalance":my_balance,
             "currentMarketPrice": current_market_price
         })
         log.debug(f"""
