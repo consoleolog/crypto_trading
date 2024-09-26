@@ -102,69 +102,64 @@ refresh_file()
 
 while True:
 
-    current_time = datetime.now()
+    try :
+        current_time = datetime.now()
 
-    df = get_ema_data(ticker=ticker, interval="minute5", count=120)
+        df = get_ema_data(ticker=ticker, interval="minutes60", count=120)
 
-    stage_result = get_stage(df)
-    stage = stage_result['stage']
+        stage_result = get_stage(df)
+        stage = stage_result['stage']
 
-    crypto_repository.save_crypto_history(stage_result['data'], stage)
+        crypto_repository.save_crypto_history(stage_result['data'], stage)
 
-    if current_time - last_send_time >= timedelta(minutes=6):
+        my_amount = get_balances(ticker)
 
-        try :
+        if my_amount != 0:
+            calculate_profit(my_amount)
 
-            my_amount = get_balances(ticker)
+        log.info(f"""
+        ==================
+        #                #
+        #     {stage}     #
+        #                #
+        ==================
+        """)
 
-            if my_amount != 0:
-                calculate_profit(my_amount)
+        result = decision_using_stage(stage)
 
+        if result['result'] == "BUY_TRUE":
             log.info(f"""
             ==================
             #                #
-            #     {stage}     #
+            #   매수 신호    #
             #                #
             ==================
             """)
+            main(stage_result['data'].tail(n=10))
 
-            result = decision_using_stage(stage)
-
-            if result['result'] == "BUY_TRUE":
-                log.info(f"""
-                ==================
-                #                #
-                #   매수 신호    #
-                #                #
-                ==================
-                """)
-                main(stage_result['data'].tail(n=10))
-
-            elif result['result'] == "SELL_TRUE":
-                log.info(f"""
-                ==================
-                #                #
-                #   매도 신호    #
-                #                #
-                ==================
-                """)
-                main(stage_result['data'].tail(n=10))
-            else :
-                pass
-
-
-            # 3 시간마다 로그 파일 , 데이터 파일 초기화
-            if current_time - last_send_time >= timedelta(hours=3):
-                log.debug("로그 파일 초기화")
-                send_log_file("로그 파일 초기화 전 백업")
-                send_mail("데이터 파일 초기화 전 백업")
-
-        except Exception as e:
-            log.error("=========================================")
-            log.error(e)
-            log.error("=========================================")
+        elif result['result'] == "SELL_TRUE":
+            log.info(f"""
+            ==================
+            #                #
+            #   매도 신호    #
+            #                #
+            ==================
+            """)
+            main(stage_result['data'].tail(n=10))
+        else :
             pass
 
+        # # 3 시간마다 로그 파일 , 데이터 파일 초기화
+        if current_time - last_send_time >= timedelta(hours=3):
+            log.debug("로그 파일 초기화")
+            send_log_file("로그 파일 초기화 전 백업")
+            send_mail("데이터 파일 초기화 전 백업")
+
         last_send_time = current_time
+    except Exception as e:
+        log.error("=========================================")
+        log.error(e)
+        log.error("=========================================")
+        pass
 
     time.sleep(60)

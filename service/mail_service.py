@@ -34,7 +34,7 @@ def send_log_file(content):
     from email.mime.base import MIMEBase
     from email.mime.multipart import MIMEMultipart
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = '[Upbit] Trading Result files'
+    msg['Subject'] = f'[Upbit] {TICKER} Trading Result files'
     msg['From'] = SMTP_FROM
     msg['To'] = SMTP_TO
     part = MIMEText(f"<h4>{content}</h4>", 'html')

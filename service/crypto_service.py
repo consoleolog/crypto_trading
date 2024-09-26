@@ -220,9 +220,9 @@ def decision_using_stage(stage):
 
     ## STAGE 1 ##
     if stage == "stage1":
-        if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= df['macd_10_20_slope'].iloc[-3] <= 0) and
-            (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2] <= df['macd_10_60_slope'].iloc[-3] <= 0) and
-             df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2] <= df['macd_10_60_slope'].iloc[-3] <= 0):
+        if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= df['macd_10_20_slope'].iloc[-3]) and
+            (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2] <= df['macd_10_60_slope'].iloc[-3]) and
+             df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2] <= df['macd_10_60_slope'].iloc[-3]):
             return {
                 "stage": "stage1",
                 "result": "SELL_TRUE"
@@ -234,9 +234,9 @@ def decision_using_stage(stage):
             }
     ## STAGE 2 ##
     elif stage == "stage2":
-        if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= df['macd_10_20_slope'].iloc[-3] <= 0) and
-            (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2] <= 0) and
-             df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2] <= 0):
+        if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= df['macd_10_20_slope'].iloc[-3]) and
+            (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2]) and
+             df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2]):
             return {
                 "stage": "stage2",
                 "result": "SELL_TRUE"
@@ -248,9 +248,9 @@ def decision_using_stage(stage):
             }
     ## STAGE 3 ##
     elif stage == "stage3":
-        if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= 0) and
-            (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2] <= 0) and
-             df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2] <= 0):
+        if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2]) and
+            (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2]) and
+             df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2]):
             return {
                 "stage": "stage3",
                 "result": "SELL_TRUE"
@@ -276,9 +276,9 @@ def decision_using_stage(stage):
             }
     ## STAGE 5 ##
     elif stage == "stage5":
-        if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3] >= 0) and
-            (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2] >= 0) and
-             df['macd_20_60_slope'].iloc[-1] >= df['macd_20_60_slope'].iloc[-2] >= 0):
+        if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3]) and
+            (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2]) and
+             df['macd_20_60_slope'].iloc[-1] >= df['macd_20_60_slope'].iloc[-2]):
             return {
                 "stage": "stage5",
                 "result": "BUY_TRUE"
@@ -290,9 +290,9 @@ def decision_using_stage(stage):
             }
     ## STAGE 6 ##
     elif stage == "stage6":
-        if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3] >= 0) and
-            (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2] >= df['macd_10_60_slope'].iloc[-3] >= 0) and
-             df['macd_20_60_slope'].iloc[-1] >= df['macd_20_60_slope'].iloc[-2] >= df['macd_10_60_slope'].iloc[-3] >= 0):
+        if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3]) and
+            (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2] >= df['macd_10_60_slope'].iloc[-3]) and
+             df['macd_20_60_slope'].iloc[-1] >= df['macd_20_60_slope'].iloc[-2] >= df['macd_10_60_slope'].iloc[-3]):
             return {
                 "stage": "stage6",
                 "result": "BUY_TRUE"
