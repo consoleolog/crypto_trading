@@ -104,15 +104,16 @@ while True:
 
     current_time = datetime.now()
 
+    df = get_ema_data(ticker=ticker, interval="minute5", count=120)
+
+    stage_result = get_stage(df)
+    stage = stage_result['stage']
+
+    crypto_repository.save_crypto_history(stage_result['data'], stage)
+
     if current_time - last_send_time >= timedelta(minutes=6):
 
         try :
-            df = get_ema_data(ticker=ticker, interval="minute5",count=120)
-
-            stage_result = get_stage(df)
-            stage = stage_result['stage']
-
-            crypto_repository.save_crypto_history(stage_result['data'], stage)
 
             my_amount = get_balances(ticker)
 
