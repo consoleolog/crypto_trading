@@ -68,7 +68,7 @@ def main(dataframe):
     elif d_result['result'] == "BUY":
         amount = get_balances(ticker)
 
-        if amount != 0:
+        if amount == 0:
             b_result = do_buy(ticker, amount, 6000)
 
             log.debug("==============================================")
