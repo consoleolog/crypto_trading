@@ -1,1 +1,1 @@
-date, close, ema10, ema20, ema60, macd_10_20, macd_10_60, macd_20_60, close_slope, ema10_slope, ema20_slope, ema60_slope, macd_10_20_slope, macd_10_60_slope, macd_20_60_slope
+date,close,ema10,ema20,ema60,macd_10_20,macd_10_60,macd_20_60,close_slope,ema10_slope,ema20_slope,ema60_slope,stage,macd_10_20_slope,macd_10_60_slope,macd_20_60_slope
