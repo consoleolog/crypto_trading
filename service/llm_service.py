@@ -113,14 +113,14 @@ def compare_with_mine(my_balance, market_balance):
             reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
-                result: "NOT_SELL"
+                result: "LOSS"
             }}}}
             
             {{{{
             reason: "이유를 말할때에는 정확한 숫자의 수치를 포함해서 말해줘 "
             }},
             {{
-                result: "SELL"
+                result: "PROFIT"
             }}}}
         """),
         ("ai","""
