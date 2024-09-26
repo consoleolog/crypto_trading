@@ -1,6 +1,8 @@
 import os
 import time
 
+import pyupbit
+
 from config import *
 
 import pandas as pd
@@ -29,8 +31,32 @@ def refresh_file():
             ed = pd.DataFrame(columns=pd.read_csv(fp).columns)
             ed.to_csv(fp, index=False)
 
+def calculate_profit(amount):
+    latest_buy_history = crypto_repository.get_buy_history()
+    my_price = latest_buy_history['my_price']
+    my_market_price = latest_buy_history['market_price']
+
+    current_market_price = pyupbit.get_current_price(f"KRW-{ticker}")
+
+    if my_price < current_market_price:
+        compare_result = compare_with_mine(my_market_price, my_price , current_market_price)
+        log.debug("==============================================")
+        log.debug("** 수익률 분석 **")
+        log.debug(compare_result['result'])
+        log.debug("==============================================")
+
+        if compare_result['result'] == "PROFIT":
+            s_result = do_sell(ticker, amount)
+            log.debug("==============================================")
+            log.debug("** 매도 결과 **")
+            log.debug(s_result)
+            log.debug("==============================================")
+            if s_result != "ALREADY_SELL":
+                send_mail("매도 결과")
+
 def main(dataframe):
-    dataframe['date'] = dataframe.apply(lambda row: f"date : {row['date']}", axis=1)
+    dataframe = dataframe.copy()
+    dataframe['date'] = dataframe['date'].astype(str)
 
     loader = DataFrameLoader(dataframe, page_content_column="date")
 
@@ -44,26 +70,12 @@ def main(dataframe):
 
         if amount == 0:
             log.debug("==============================================")
-            log.debug("** 매수 결과 **")
+            log.debug("** 매도 결과 **")
             log.debug("ALREADY_SELL")
             log.debug("==============================================")
             pass
         else:
-            latest_history = crypto_repository.get_latest_buy_history()
-            if latest_history != "None":
-                c_result = compare_with_mine(latest_history, pyupbit.get_current_price(f"KRW-{ticker}"))
-                log.info(c_result['result'])
-
-                if c_result['result'] == "PROFIT":
-                    s_result = do_sell(ticker, amount)
-
-                    log.debug("==============================================")
-                    log.debug("** 매도 결과 **")
-                    log.debug(s_result)
-                    log.debug("==============================================")
-
-                    if s_result != "ALREADY_SELL":
-                        send_mail("매도 결과")
+            calculate_profit(amount)
 
     elif d_result['result'] == "BUY":
         amount = get_balances(ticker)
@@ -86,67 +98,72 @@ def main(dataframe):
     else:
         pass
 
-# 처음 시작시 파일 초기화
 refresh_file()
 
 while True:
 
-    try :
-        df = get_ema_data(ticker=ticker, interval="day",count=120)
+    current_time = datetime.now()
 
-        stage_result = get_stage(df)
-        stage = stage_result['stage']
+    if current_time - last_send_time >= timedelta(minutes=6):
 
-        log.info(f"""
-        ==================
-        #                #
-        #     {stage}     #
-        #                #
-        ==================
-        """)
+        try :
+            df = get_ema_data(ticker=ticker, interval="minute5",count=120)
 
-        result = decision_using_stage(stage, df)
+            stage_result = get_stage(df)
+            stage = stage_result['stage']
 
-        if result['result'] == "BUY_TRUE":
+            crypto_repository.save_crypto_history(stage_result['data'], stage)
+
+            my_amount = get_balances(ticker)
+
+            if my_amount != 0:
+                calculate_profit(my_amount)
+
             log.info(f"""
             ==================
             #                #
-            #   매수 신호    #
+            #     {stage}     #
             #                #
             ==================
             """)
-            main(stage_result['data'].tail(n=10))
 
-        elif result['result'] == "SELL_TRUE":
-            log.info(f"""
-            ==================
-            #                #
-            #   매도 신호    #
-            #                #
-            ==================
-            """)
-            main(stage_result['data'].tail(n=10))
-        else :
+            result = decision_using_stage(stage)
+
+            if result['result'] == "BUY_TRUE":
+                log.info(f"""
+                ==================
+                #                #
+                #   매수 신호    #
+                #                #
+                ==================
+                """)
+                main(stage_result['data'].tail(n=10))
+
+            elif result['result'] == "SELL_TRUE":
+                log.info(f"""
+                ==================
+                #                #
+                #   매도 신호    #
+                #                #
+                ==================
+                """)
+                main(stage_result['data'].tail(n=10))
+            else :
+                pass
+
+
+            # 3 시간마다 로그 파일 , 데이터 파일 초기화
+            if current_time - last_send_time >= timedelta(hours=3):
+                log.debug("로그 파일 초기화")
+                send_log_file("로그 파일 초기화 전 백업")
+                send_mail("데이터 파일 초기화 전 백업")
+
+        except Exception as e:
+            log.error("=========================================")
+            log.error(e)
+            log.error("=========================================")
             pass
 
-
-        current_time = datetime.now()
-
-        # 3 시간마다 로그 파일 , 데이터 파일 초기화
-        if current_time - last_send_time >= timedelta(hours=3):
-            log.debug("로그 파일 초기화")
-            send_log_file("로그 파일 초기화 전 백업")
-            send_mail("데이터 파일 초기화 전 백업")
-
-            refresh_file()
-
-            # 마지막으로 메일을 보낸 시간을 업데이트
-            last_send_time = current_time
-
-    except Exception as e:
-        log.error("=========================================")
-        log.error(e)
-        log.error("=========================================")
-        pass
+        last_send_time = current_time
 
     time.sleep(60)

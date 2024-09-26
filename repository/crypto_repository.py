@@ -1,6 +1,6 @@
-def save_crypto_history(df):
+def save_crypto_history(df, stage):
   with open('./data/crypto_history.csv', 'a', encoding='utf-8') as f:
-      f.write(f"""\n{df['date'].iloc[-1]}, {df['close'].iloc[-1]}, {df['ema10'].iloc[-1]}, {df['ema20'].iloc[-1]}, {df['ema60'].iloc[-1]}, {df['macd_10_20'].iloc[-1]}, {df['macd_10_60'].iloc[-1]}, {df['macd_20_60'].iloc[-1]} , {df['close_slope'].iloc[-1]}, {df['ema10_slope'].iloc[-1]}, {df['ema20_slope'].iloc[-1]}, {df['ema60_slope'].iloc[-1]} , {df['macd_10_20_slope'].iloc[-1]}, {df['macd_10_60_slope'].iloc[-1]}, {df['macd_20_60_slope'].iloc[-1]}""")
+      f.write(f"""\n{df['date'].iloc[-1]},{df['close'].iloc[-1]},{df['ema10'].iloc[-1]},{df['ema20'].iloc[-1]},{df['ema60'].iloc[-1]},{df['macd_10_20'].iloc[-1]},{df['macd_10_60'].iloc[-1]},{df['macd_20_60'].iloc[-1]},{df['close_slope'].iloc[-1]},{df['ema10_slope'].iloc[-1]},{df['ema20_slope'].iloc[-1]},{df['ema60_slope'].iloc[-1]},{stage},{df['macd_10_20_slope'].iloc[-1]},{df['macd_10_60_slope'].iloc[-1]},{df['macd_20_60_slope'].iloc[-1]}""")
       f.close()
 
 
@@ -28,15 +28,14 @@ def save_buy_or_sell_history(bs, df):
     else:
         pass
 
+def get_crypto_history():
+    import pandas as pd
+    import os
+    data = pd.read_csv(f'{os.getcwd()}/data/crypto_history.csv', encoding='utf-8')
+    return data.tail(n=8)
+
 def get_buy_history():
     import pandas as pd
-    data = pd.read_csv('./data/crypto_buy_history.csv', encoding='utf-8')
-
-def get_latest_buy_history():
-    import pandas as pd
-    try :
-        data = pd.read_csv('./data/crypto_buy_history.csv', encoding='utf-8')
-        latest_history = data.iloc[-1, 3]
-        return latest_history
-    except Exception:
-        return "None"
+    import os
+    data = pd.read_csv(f'{os.getcwd()}/data/crypto_buy_history.csv', encoding='utf-8')
+    return data.iloc[-1]
