@@ -1,7 +1,5 @@
 import time
 
-from sympy.physics.units import amount
-
 from config import *
 
 
