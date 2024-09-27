@@ -64,7 +64,7 @@ def main(dataframe):
         if crypto_service.get_balances(ticker) == 0:
             buy_result = crypto_service.do_buy({
                 "ticker":ticker,
-                "amount": amount,
+                "amount": crypto_service.get_balances(ticker),
                 "price": 6000
             })
             log.debug(f"""
@@ -96,13 +96,11 @@ while True:
         ==================
         """)
 
-        result = crypto_service.stage_calling(stage)
-
         if crypto_service.get_balances(ticker) != 0:
             log.info(f"""
             =====================
             #                   #
-            #    이익 추정 구간    #
+            #   이익 추정 구간  #   
             #                   #
             =====================
             """)
@@ -121,12 +119,13 @@ while True:
                             ==================================  
                             """)
 
+        result = crypto_service.stage_calling(stage)
 
         if result['result'] == "BUY_TRUE":
             log.info(f"""
             ==================
             #                #
-            #   매수 신호    #
+            #   매수 신호    #   
             #                #
             ==================
             """)

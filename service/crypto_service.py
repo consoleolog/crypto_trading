@@ -6,7 +6,6 @@ from logger import log
 
 from repository import crypto_repository
 from service import ai_service, mail_service
-from service.mail_service import send_mail
 
 upbit = Upbit(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
 
@@ -111,31 +110,37 @@ def get_stage(df):
     """)
 
     if short >= middle >= long:  # 단 중 장
+        crypto_repository.save_crypto_history(df, "stage1")
         return {
             "stage": "stage1",
             "data" : df
         }
     elif middle >= short >= long:  # 중 단 장
+        crypto_repository.save_crypto_history(df, "stage2")
         return {
             "stage": "stage2",
             "data": df
         }
     elif middle >= long >= short:  # 중 장 단
+        crypto_repository.save_crypto_history(df, "stage3")
         return {
             "stage": "stage3",
             "data": df
         }
     elif long >= middle >= short:  # 장  중 단
+        crypto_repository.save_crypto_history(df, "stage4")
         return {
             "stage": "stage4",
             "data": df
         }
     elif long >= short >= middle:  # 장 단 중
+        crypto_repository.save_crypto_history(df, "stage5")
         return {
             "stage": "stage5",
             "data": df
         }
     elif short >= long >= middle:  # 단 장 중
+        crypto_repository.save_crypto_history(df, "stage6")
         return {
             "stage": "stage6",
             "data": df
@@ -255,37 +260,33 @@ def stage_calling(stage):
                 "stage": "stage6",
                 "result": "BUY_FALSE"
             }
-    else:
-        return {
-            "result": "None"
-        }
 
 def calculate_profit(inputs):
-    history = crypto_repository.get_buy_history()
 
-    current_market_price = pyupbit.get_current_price(f"KRW-{inputs['ticker']}")
+        history = crypto_repository.get_buy_history()
 
-    ## 내 가격보다 현재 시장 가격이 더 높다면 가격 비교를하고 이익이면 매도 ##
-    if history['my_price'] < current_market_price:
-        result = ai_service.is_profit({
-            "myPrice": history['my_price'],
-            "myBalance": history['balance'],
-            "marketPrice": history['market_price'],
-            "currentMarketPrice": current_market_price
-        })
-        if result['result'] == "PROFIT":
-            return {
-                "result": "PROFIT",
-            }
+        current_market_price = pyupbit.get_current_price(f"KRW-{inputs['ticker']}")
+
+        ## 내 가격보다 현재 시장 가격이 더 높다면 가격 비교를하고 이익이면 매도 ##
+        if history['my_price'] < current_market_price:
+            result = ai_service.is_profit({
+                "myPrice": history['my_price'],
+                "myBalance": history['balance'],
+                "marketPrice": history['market_price'],
+                "currentMarketPrice": current_market_price
+            })
+            if result['result'] == "PROFIT":
+                return {
+                    "result": "PROFIT",
+                }
+            else:
+                return {
+                    "result": "LOSS",
+                }
         else:
             return {
-                "result": "LOSS",
+                "result": "LOSS"
             }
-    else:
-        return {
-        "result": "LOSS"
-    }
-
 
 
 
