@@ -2,12 +2,13 @@ from email.mime.text import MIMEText
 
 from config import *
 
+import os
+import smtplib
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+
 def send_mail(content):
-    import os
-    import smtplib
-    from email import encoders
-    from email.mime.base import MIMEBase
-    from email.mime.multipart import MIMEMultipart
     msg = MIMEMultipart('alternative')
     msg['Subject'] = '[Upbit] Trading Result files'
     msg['From'] = SMTP_FROM
@@ -28,11 +29,6 @@ def send_mail(content):
     s.close()
 
 def send_log_file(content):
-    import os
-    import smtplib
-    from email import encoders
-    from email.mime.base import MIMEBase
-    from email.mime.multipart import MIMEMultipart
     msg = MIMEMultipart('alternative')
     msg['Subject'] = f'[Upbit] {TICKER} Trading Result files'
     msg['From'] = SMTP_FROM

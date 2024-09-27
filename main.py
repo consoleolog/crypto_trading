@@ -100,6 +100,30 @@ while True:
 
         result = crypto_service.stage_calling(stage)
 
+        if crypto_service.get_balances(ticker) != 0:
+            log.info(f"""
+            =====================
+            #                   #
+            #    이익 추정 구간    #
+            #                   #
+            =====================
+            """)
+            is_profit = crypto_service.calculate_profit({
+                "ticker": ticker
+            })
+            if is_profit['result'] == "PROFIT":
+                sell_result = crypto_service.do_sell({
+                    "ticker": ticker,
+                    "amount": crypto_service.get_balances(ticker)
+                })
+                log.debug(f"""
+                            ================================== 
+                              ** 매도 결과 **                    
+                            $$  {sell_result}  $$              
+                            ==================================  
+                            """)
+
+
         if result['result'] == "BUY_TRUE":
             log.info(f"""
             ==================
@@ -128,9 +152,9 @@ while True:
             send_mail("데이터 파일 초기화 전 백업")
 
         last_send_time = current_time
-    except Exception as e:
+    except Exception as err:
         log.error("=========================================")
-        log.error(e)
+        log.error(err)
         log.error("=========================================")
         pass
 
