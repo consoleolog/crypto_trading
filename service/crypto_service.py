@@ -5,6 +5,7 @@ from config import *
 from logger import log
 
 from repository import crypto_repository
+from service import ai_service
 
 upbit = Upbit(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
 
@@ -23,22 +24,18 @@ def get_balances(ticker):
                 return 0
     return 0
 
-def do_buy(ticker, amount, price):
+def do_buy(inputs):
     """
     암호화폐 매수하는 함수
-    :param ticker: 종목 코드
-    :param amount: 내가 가지고있는 암호화페 양
-    :param price:  구매할 가격
-    :return: str | dict
     """
     try:
-        if amount == 0:
-            msg = upbit.buy_market_order(f"KRW-{ticker}", price)
+        if inputs['amount'] == 0:
+            msg = upbit.buy_market_order(f"KRW-{inputs['ticker']}", inputs['price'])
             if msg == None:
                 return "ALREADY_BUY"
             if isinstance(msg, dict):
-                msg['market_price'] = pyupbit.get_current_price(f"KRW-{ticker}")
-                msg['balance'] = get_balances(ticker)
+                msg['market_price'] = pyupbit.get_current_price(f"KRW-{inputs['ticker']}")
+                msg['balance'] = get_balances(inputs['ticker'])
                 crypto_repository.save_buy_or_sell_history("BUY", msg)
                 return msg
             return msg
@@ -48,20 +45,17 @@ def do_buy(ticker, amount, price):
         log.error(e)
         raise
 
-def do_sell(ticker, amount):
+def do_sell(inputs):
     """
     암호화폐 매도하는 함수
-    :param ticker: 종목 코드
-    :param amount: 내가 가지고 있는 암호화폐 양
-    :return: str | dict
     """
     try:
-        msg = upbit.sell_market_order(f"KRW-{ticker}", amount)
+        msg = upbit.sell_market_order(f"KRW-{inputs['ticker']}", inputs['amount'])
         # 'error' 키가 있는지 확인
         if isinstance(msg, dict) and 'error' in msg:
             return "ALREADY_SELL"
         if isinstance(msg, dict):
-            msg['market_price'] = pyupbit.get_current_price(f"KRW-{ticker}")
+            msg['market_price'] = pyupbit.get_current_price(f"KRW-{inputs['ticker']}")
             crypto_repository.save_buy_or_sell_history("SELL", msg)
             return msg
         return msg
@@ -170,53 +164,8 @@ def get_ema_data(ticker, interval, count):
 
     return data
 
-def analyze_slope(df):
-    log.info("=================================================")
-    log.info("## ** 기울기 분석 **")
-    if df['macd_10_20_slope'].iloc[-1] < df['macd_10_20_slope'].iloc[-2]:
-        log.info("[1] MACD (하) 기울기 감소")
-        if df['macd_10_20_slope'].iloc[-2] < df['macd_10_20_slope'].iloc[-3]:
-            log.info("[2] MACD (하) 기울기 감소")
-            if df['macd_10_20_slope'].iloc[-3] < df['macd_10_20_slope'].iloc[-4]:
-                log.info("[3] MACD (하) 기울기 감소")
-            else:
-                log.info("[3] MACD (하) 기울기 증가")
-        else:
-            log.info("[2] MACD (하) 기울기 증가")
-    else:
-        log.info("[1] MACD (하) 기울기 증가")
 
-
-
-    if df['macd_10_60_slope'].iloc[-1] < df['macd_10_60_slope'].iloc[-2]:
-        log.info("[1] MACD (중) 기울기 감소")
-        if df['macd_10_60_slope'].iloc[-2] < df['macd_10_60_slope'].iloc[-3]:
-            log.info("[2] MACD (중) 기울기 감소")
-            if df['macd_10_60_slope'].iloc[-3] < df['macd_10_60_slope'].iloc[-4]:
-                log.info("[3] MACD (중) 기울기 감소")
-            else:
-                log.info("[3] MACD (중) 기울기 증가")
-        else:
-            log.info("[2] MACD (중) 기울기 증가")
-    else:
-        log.info("[1] MACD (중) 기울기 증가")
-
-
-    if df['macd_20_60_slope'].iloc[-1] < df['macd_20_60_slope'].iloc[-2]:
-        log.info("[1] MACD (상) 기울기 감소")
-        if df['macd_20_60_slope'].iloc[-2] < df['macd_20_60_slope'].iloc[-3]:
-            log.info("[2] MACD (상) 기울기 감소")
-            if df['macd_20_60_slope'].iloc[-3] < df['macd_20_60_slope'].iloc[-4]:
-                log.info("[3] MACD (상) 기울기 감소")
-            else:
-                log.info("[3] MACD (상) 기울기 증가")
-        else:
-            log.info("[2] MACD (상) 기울기 증가")
-    else:
-        log.info("[1] MACD (상) 기울기 증가")
-
-
-def decision_using_stage(stage):
+def stage_calling(stage):
     df = crypto_repository.get_crypto_history()
 
     ## STAGE 1 ##
@@ -307,6 +256,33 @@ def decision_using_stage(stage):
         return {
             "result": "None"
         }
+
+def calculate_profit(inputs):
+    history = crypto_repository.get_buy_history()
+
+    current_market_price = pyupbit.get_current_price(f"KRW-{inputs['ticker']}")
+
+    ## 내 가격보다 현재 시장 가격이 더 높다면 가격 비교를하고 이익이면 매도 ##
+    if history['my_price'] < current_market_price:
+        result = ai_service.is_profit({
+            "myPrice": history['my_price'],
+            "myBalance": history['balance'],
+            "marketPrice": history['market_price'],
+            "currentMarketPrice": current_market_price
+        })
+        if result['result'] == "PROFIT":
+            return {
+                "result": "PROFIT",
+            }
+        else:
+            return {
+                "result": "LOSS",
+            }
+    else:
+        return {
+        "result": "LOSS"
+    }
+
 
 
 
