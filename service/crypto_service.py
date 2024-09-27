@@ -5,7 +5,8 @@ from config import *
 from logger import log
 
 from repository import crypto_repository
-from service import ai_service
+from service import ai_service, mail_service
+from service.mail_service import send_mail
 
 upbit = Upbit(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
 
@@ -37,6 +38,7 @@ def do_buy(inputs):
                 msg['market_price'] = pyupbit.get_current_price(f"KRW-{inputs['ticker']}")
                 msg['balance'] = get_balances(inputs['ticker'])
                 crypto_repository.save_buy_or_sell_history("BUY", msg)
+                mail_service.send_mail(f"{inputs['ticker']} 매수 결과")
                 return msg
             return msg
         else:
@@ -57,6 +59,7 @@ def do_sell(inputs):
         if isinstance(msg, dict):
             msg['market_price'] = pyupbit.get_current_price(f"KRW-{inputs['ticker']}")
             crypto_repository.save_buy_or_sell_history("SELL", msg)
+            mail_service.send_mail(f"{inputs['ticker']} 매도 결과")
             return msg
         return msg
     except Exception as e:
