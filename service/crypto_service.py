@@ -177,49 +177,49 @@ def stage_calling(stage):
     df = crypto_repository.get_crypto_history()
 
     ## STAGE 1 ##
-    if stage == "stage1":
-        if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= df['macd_10_20_slope'].iloc[-3]) and
-            (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2] <= df['macd_10_60_slope'].iloc[-3]) and
-             df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2] <= df['macd_10_60_slope'].iloc[-3]):
-            return {
-                "stage": "stage1",
-                "result": "SELL_TRUE"
-            }
-        else:
-            return {
-                "stage": "stage1",
-                "result": "SELL_FALSE"
-            }
-    ## STAGE 2 ##
-    elif stage == "stage2":
-        if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= df['macd_10_20_slope'].iloc[-3]) and
-            (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2]) and
-             df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2]):
-            return {
-                "stage": "stage2",
-                "result": "SELL_TRUE"
-            }
-        else:
-            return {
-                "stage": "stage2",
-                "result": "SELL_FALSE"
-            }
-    ## STAGE 3 ##
-    elif stage == "stage3":
-        if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2]) and
-            (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2]) and
-             df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2]):
-            return {
-                "stage": "stage3",
-                "result": "SELL_TRUE"
-            }
-        else:
-            return {
-                "stage": "stage3",
-                "result": "SELL_FALSE"
-            }
+    # if stage == "stage1":
+    #     if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= df['macd_10_20_slope'].iloc[-3]) and
+    #         (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2] <= df['macd_10_60_slope'].iloc[-3]) and
+    #          df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2] <= df['macd_10_60_slope'].iloc[-3]):
+    #         return {
+    #             "stage": "stage1",
+    #             "result": "SELL_TRUE"
+    #         }
+    #     else:
+    #         return {
+    #             "stage": "stage1",
+    #             "result": "SELL_FALSE"
+    #         }
+    # ## STAGE 2 ##
+    # elif stage == "stage2":
+    #     if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= df['macd_10_20_slope'].iloc[-3]) and
+    #         (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2]) and
+    #          df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2]):
+    #         return {
+    #             "stage": "stage2",
+    #             "result": "SELL_TRUE"
+    #         }
+    #     else:
+    #         return {
+    #             "stage": "stage2",
+    #             "result": "SELL_FALSE"
+    #         }
+    # ## STAGE 3 ##
+    # elif stage == "stage3":
+    #     if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2]) and
+    #         (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2]) and
+    #          df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2]):
+    #         return {
+    #             "stage": "stage3",
+    #             "result": "SELL_TRUE"
+    #         }
+    #     else:
+    #         return {
+    #             "stage": "stage3",
+    #             "result": "SELL_FALSE"
+    #         }
     ## STAGE 4 ##
-    elif stage == "stage4":
+    if stage == "stage4":
         if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3] >= df['macd_10_20_slope'].iloc[-4]) and
             (df['macd_10_60_slope'].iloc[-1] >= df['macd_10_60_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[-3] >= df['macd_10_20_slope'].iloc[-4]) and
              df['macd_20_60_slope'].iloc[-1] >= df['macd_20_60_slope'].iloc[-2]):
@@ -261,6 +261,12 @@ def stage_calling(stage):
                 "result": "BUY_FALSE"
             }
 
+def get_profit(inputs):
+
+    history = crypto_repository.get_buy_history()
+
+    return (pyupbit.get_current_price(f"KRW-{inputs['ticker']}") - history['market_price'])/ history['market_price'] * 100
+
 def calculate_profit(inputs):
 
         history = crypto_repository.get_buy_history()
@@ -287,7 +293,3 @@ def calculate_profit(inputs):
             return {
                 "result": "LOSS"
             }
-
-
-
-

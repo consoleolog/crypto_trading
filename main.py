@@ -104,10 +104,10 @@ while True:
             #                   #
             =====================
             """)
-            is_profit = crypto_service.calculate_profit({
-                "ticker": ticker
+            profit = crypto_service.get_profit({
+                "ticker":ticker
             })
-            if is_profit['result'] == "PROFIT":
+            if profit > 0.6 :
                 sell_result = crypto_service.do_sell({
                     "ticker": ticker,
                     "amount": crypto_service.get_balances(ticker)
