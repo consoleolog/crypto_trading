@@ -22,6 +22,14 @@ while True:
     stage_result = crypto_service.get_stage(df)
     stage = stage_result['stage']
 
+    log.info(f"""
+    ==================
+    #                #
+    #     {stage}     #
+    #                #
+    ==================
+    """)
+
     if stage == "stage4" or stage == "stage5":
         if crypto_service.get_balances(ticker) == 0:
             buy_result = crypto_service.do_buy({
