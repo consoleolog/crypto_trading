@@ -30,7 +30,7 @@ while True:
     ==================
     """)
 
-    if stage == "stage4" or stage == "stage5":
+    if stage=="stage3" or stage == "stage4" or stage == "stage5":
         if crypto_service.get_balances(ticker) == 0:
             buy_result = crypto_service.do_buy({
                 "ticker":ticker,
