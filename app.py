@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from config import *
 from repository.crypto_repository import CryptoRepository
 from service.crypto_service import CryptoService
 from service.ai_service import LLmService
@@ -26,7 +27,8 @@ class CryptoApplication(containers.DeclarativeContainer):
         CryptoService,
         crypto_repository=crypto_repository,
         llm_service=llm_service,
-        mail_service=mail_service
+        mail_service=mail_service,
+        ticker=TICKER
     )
 
 @inject
@@ -42,18 +44,6 @@ def main(dataframe,
 
     buy_or_sell = llm_service.buy_or_sell({"data": data})
 
-    if buy_or_sell['result'] == "SELL":
-        if crypto_service.get_balances() == 0:
-            log.debug("""
-            ================================== 
-              ** 매도 결과 **                    
-              보유한 암호화폐가 없음              
-            ==================================  
-            """)
-        else:
-            profit = crypto_service.get_profit()
-            if profit > 0.6:
-                crypto_service.do_sell({"amount": crypto_service.get_balances()})
     if buy_or_sell['result'] == "BUY":
         if crypto_service.get_balances() == 0:
             crypto_service.do_buy({
@@ -62,62 +52,60 @@ def main(dataframe,
             })
 
 def App():
-    app = CryptoApplication()
+    try :
+        app = CryptoApplication()
 
-    crypto_service = app.crypto_service()
-    llm_service = app.llm_service()
+        crypto_service = app.crypto_service()
+        llm_service = app.llm_service()
 
-    df = crypto_service.get_ema_data("minutes60", 120)
+        df = crypto_service.get_ema_data("minute1", 120)
 
-    stage_result = crypto_service.get_stage(df)
+        stage_result = crypto_service.get_stage(df)
 
-    stage = stage_result['stage']
+        stage = stage_result['stage']
 
-    log.info(f"""
-    ==================
-    #     {stage}     #
-    ==================
-    """)
-
-    if crypto_service.get_balances() != 0:
         log.info(f"""
-        =====================
-        #   이익 추정 구간  #   
-        =====================
-        """)
-        profit = crypto_service.get_profit()
-        log.info(f"""
-        ====================================================
-        ** 이익률 **
-        $$ {profit}     
-        ====================================================
-        """)
+            ==================
+            #     {stage}     #
+            ==================
+            """)
 
-        if profit > 0.6 :
-             crypto_service.do_sell({
-                "amount":crypto_service.get_balances()
-            })
+        if crypto_service.get_balances() != 0:
+            log.info(f"""
+                =====================
+                #   이익 추정 구간  #   
+                =====================
+                """)
+            profit = crypto_service.get_profit()
+            log.info(f"""
+                ====================================================
+                ** 이익률 **
+                $$ {profit}     
+                ====================================================
+                """)
+            if profit > 0.6:
+                df = df.copy()
+                df['date'] = df['date'].astype(str)
+                loader = DataFrameLoader(df, page_content_column="date")
+                data = loader.load()
+                crypto_service.profit_calling({
+                    "profit": profit,
+                    "data": data
+                })
 
         result = crypto_service.stage_calling(stage)
 
         if result['result'] == "BUY_TRUE":
             log.info(f"""
-            ==================
-            #   매수 신호    #   
-            ==================
-            """)
+                ==================
+                #   매수 신호    #   
+                ==================
+                """)
             main(dataframe=df,
                  llm_service=llm_service,
                  crypto_service=crypto_service
-            )
+                 )
 
-        if result['result'] == "SELL_TRUE":
-            log.info(f"""
-            ==================
-            #   매도 신호    #
-            ==================
-            """)
-            main(dataframe=df,
-                 llm_service=llm_service,
-                 crypto_service=crypto_service
-            )
+    except Exception as ex:
+        log.warn(ex)
+        pass

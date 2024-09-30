@@ -1,6 +1,6 @@
-import os
 import pandas as pd
 import os
+from datetime import datetime
 
 class CryptoRepository:
     def __init__(self):
@@ -12,7 +12,6 @@ class CryptoRepository:
             f.close()
 
     def save_buy_or_sell_history(self, bs, df):
-        from datetime import datetime
 
         datefmt = '%Y-%m-%d %H:%M:%S'
 
@@ -22,7 +21,7 @@ class CryptoRepository:
 
         try:
             df['balance']
-        except KeyError as ke:
+        except KeyError:
             df['locked'] = 0
             df['balance'] = 0
 
@@ -33,8 +32,6 @@ class CryptoRepository:
             with open(f'{self.root_dir}/crypto_buy_history.csv', 'a', encoding='utf-8') as f:
                 f.write(f"\n {fdt}, {df['market']}, {df['locked']} , {df['market_price']},{df['balance']}")
                 f.close()
-        else:
-            pass
 
     def get_crypto_history(self):
         data = pd.read_csv(f'{self.root_dir}/crypto_history.csv', encoding='utf-8')
