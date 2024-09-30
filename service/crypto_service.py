@@ -14,11 +14,12 @@ class CryptoService:
     def __init__(self,
                  crypto_repository : CryptoRepository,
                  mail_service : MailService,
-                 llm_service : LLmService):
+                 llm_service : LLmService,
+                 ticker: str):
         self.crypto_repository = crypto_repository
         self.mail_service = mail_service
         self.llm_service = llm_service
-        self.ticker = TICKER
+        self.ticker = ticker
 
     def get_balances(self):
         balances = upbit.get_balances()
@@ -37,7 +38,7 @@ class CryptoService:
         try:
             if inputs['amount'] == 0:
                 msg = upbit.buy_market_order(f"KRW-{self.ticker}", inputs['price'])
-                if msg == None:
+                if msg is None:
                     return "ALREADY_BUY"
                 if isinstance(msg, dict):
                     msg['market_price'] = pyupbit.get_current_price(f"KRW-{self.ticker}")
@@ -165,11 +166,7 @@ class CryptoService:
             }
 
     def get_ema_data(self, interval, count):
-        """
-        :param count:
-        :param interval:
-        :return: DataFrame
-        """
+
         data = pyupbit.get_ohlcv(ticker=f"KRW-{self.ticker}", interval=interval, count=count)
         data['ema10'] = data['close'].ewm(span=10, adjust=False, min_periods=10).mean().dropna().astype(int)
         data['ema20'] = data['close'].ewm(span=20, adjust=False, min_periods=20).mean().dropna().astype(int)
@@ -190,48 +187,6 @@ class CryptoService:
     def stage_calling(self, stage):
         df = self.crypto_repository.get_crypto_history()
 
-        ## STAGE 1 ##
-        if stage == "stage1":
-            if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= df['macd_10_20_slope'].iloc[-3]) and
-                (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2] <= df['macd_10_60_slope'].iloc[-3]) and
-                 df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2] <= df['macd_10_60_slope'].iloc[-3]):
-                return {
-                    "stage": "stage1",
-                    "result": "SELL_TRUE"
-                }
-            else:
-                return {
-                    "stage": "stage1",
-                    "result": "SELL_FALSE"
-                }
-        ## STAGE 2 ##
-        elif stage == "stage2":
-            if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2] <= df['macd_10_20_slope'].iloc[-3]) and
-                (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2]) and
-                 df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2]):
-                return {
-                    "stage": "stage2",
-                    "result": "SELL_TRUE"
-                }
-            else:
-                return {
-                    "stage": "stage2",
-                    "result": "SELL_FALSE"
-                }
-        ## STAGE 3 ##
-        elif stage == "stage3":
-            if ((df['macd_10_20_slope'].iloc[-1] <= df['macd_10_20_slope'].iloc[-2]) and
-                (df['macd_10_60_slope'].iloc[-1] <= df['macd_10_60_slope'].iloc[-2]) and
-                 df['macd_20_60_slope'].iloc[-1] <= df['macd_20_60_slope'].iloc[-2]):
-                return {
-                    "stage": "stage3",
-                    "result": "SELL_TRUE"
-                }
-            else:
-                return {
-                    "stage": "stage3",
-                    "result": "SELL_FALSE"
-                }
         ## STAGE 4 ##
         if stage == "stage4":
             if ((df['macd_10_20_slope'].iloc[-1] >= df['macd_10_20_slope'].iloc[-2] >= df['macd_10_20_slope'].iloc[
@@ -280,9 +235,18 @@ class CryptoService:
                     "stage": "stage6",
                     "result": "BUY_FALSE"
                 }
+        else :
+            return {
+                "result":"None"
+            }
 
     def get_profit(self):
 
         history = self.crypto_repository.get_buy_history()
 
         return (pyupbit.get_current_price(f"KRW-{self.ticker}") - history['market_price']) / history['market_price'] * 100
+
+    def profit_calling(self, inputs):
+        buy_or_sell = self.llm_service.buy_or_sell({"data":inputs["data"]})
+        if buy_or_sell['result'] == "SELL":
+            self.do_sell({"amount": self.get_balances()})

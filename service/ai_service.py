@@ -74,55 +74,7 @@ class LLmService:
         log.debug(f"""
         ==============================================================================================================================      
           ** 매매 분석 **
-
-          {result['reason']}
-
+          $$ {result['reason']}
         ==============================================================================================================================  
         """)
-        return result
-
-    def is_profit(self, inputs):
-        template = ChatPromptTemplate.from_messages([
-            ("system",
-             """
-             너는 암호화폐 전문가야 
-             조건에 따라 이익 : PROFIT, 이 발생하는지 손실 : LOSS 이 발생하는지 계산하고 결과를 알려줘        
-
-            Example output:
-
-            ```json
-            {{
-                "reason": "이유를 말할 때 정확한 숫자 수치를 포함해줘",
-                "result": "PROFIT"
-            }}
-            ```
-
-            ```json
-            {{
-                "reason": "이유를 말할 때 정확한 숫자 수치를 포함해줘",
-                "result": "LOSS"
-            }}
-            ``` 
-
-            계산할 데이터 :  
-                매수한 암호화폐 양 : {myPrice} 원으로 {myBalance} 만큼의 양을 매수
-                매수할 당시 암호화폐 가격 : {marketPrice},
-                현재 암호화폐 가격 : {currentMarketPrice}
-             """)
-        ])
-        chain = template | self.model | self.output_parser
-        result = chain.invoke({
-            "myPrice": inputs['myPrice'],
-            "myBalance": inputs['myBalance'],
-            "marketPrice": inputs['marketPrice'],
-            "currentMarketPrice": inputs['currentMarketPrice']
-        })
-        log.debug(f"""
-            ==============================================================================================================================
-              ** 내 가격과 현재 시장 가격 비교 **
-
-              {result['reason']}
-
-            ==============================================================================================================================
-            """)
         return result
