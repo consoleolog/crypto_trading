@@ -95,16 +95,17 @@ def App():
 
         result = crypto_service.stage_calling(stage)
 
-        if result['result'] == "BUY_TRUE":
-            log.info(f"""
-                ==================
-                #   매수 신호    #   
-                ==================
-                """)
-            main(dataframe=df,
-                 llm_service=llm_service,
-                 crypto_service=crypto_service
-                 )
+        if crypto_service.get_balances != 0:
+            if result['result'] == "BUY_TRUE":
+                log.info(f"""
+                    ==================
+                    #   매수 신호    #   
+                    ==================
+                    """)
+                main(dataframe=df,
+                     llm_service=llm_service,
+                     crypto_service=crypto_service
+                     )
 
     except Exception as ex:
         log.warn(ex)
