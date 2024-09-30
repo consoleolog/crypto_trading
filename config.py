@@ -14,3 +14,7 @@ TICKER=os.getenv('TICKER')
 
 LOG_DIR=f"{os.getcwd()}/logs"
 DATA_DIR=f"{os.getcwd()}/data"
+
+S3_AWS_ACCESS_KEY=os.getenv('S3_AWS_ACCESS_KEY')
+S3_AWS_SECRET_KEY=os.getenv('S3_AWS_SECRET_KEY')
+S3_BUCKET_NAME=os.getenv('S3_BUCKET_NAME')
