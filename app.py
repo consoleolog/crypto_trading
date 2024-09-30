@@ -95,7 +95,7 @@ def App():
 
         result = crypto_service.stage_calling(stage)
 
-        if crypto_service.get_balances != 0:
+        if crypto_service.get_balances == 0:
             if result['result'] == "BUY_TRUE":
                 log.info(f"""
                     ==================
