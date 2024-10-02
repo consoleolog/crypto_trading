@@ -20,12 +20,13 @@ class MailService:
         part = MIMEText(f"<h4>{content}</h4>", 'html')
         msg.attach(part)
         for filename in os.listdir(f'{self.root_dir}/data'):
-            with open(f'{self.root_dir}/data/{filename}', 'rb') as f:
-                file = MIMEBase("application", "octet-stream")
-                file.set_payload(f.read())
-            encoders.encode_base64(file)
-            file.add_header("Content-Disposition", f"attachment; filename= {filename}")
-            msg.attach(file)
+            if filename != "crypto_history.csv":
+                with open(f'{self.root_dir}/data/{filename}', 'rb') as f:
+                    file = MIMEBase("application", "octet-stream")
+                    file.set_payload(f.read())
+                encoders.encode_base64(file)
+                file.add_header("Content-Disposition", f"attachment; filename= {filename}")
+                msg.attach(file)
         s = smtplib.SMTP('smtp.naver.com', 587)
         s.starttls()
         s.login(NAVER_ID, NAVER_PASSWORD)
