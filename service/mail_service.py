@@ -51,3 +51,22 @@ class MailService:
         s.login(NAVER_ID, NAVER_PASSWORD)
         s.sendmail(SMTP_FROM, SMTP_TO, msg.as_string())
         s.close()
+
+    def send_file(self, inputs):
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f'[Upbit] {TICKER} Trading Result files'
+        msg['From'] = SMTP_FROM
+        msg['To'] = SMTP_TO
+        part = MIMEText(f"<h4>{inputs['content']}</h4>", 'html')
+        msg.attach(part)
+        with open(f"{self.root_dir}/data/{inputs['filename']}", 'rb') as f:
+            file = MIMEBase("application", "octet-stream")
+            file.set_payload(f.read())
+            encoders.encode_base64(file)
+            file.add_header("Content-Disposition", f"attachment; filename=crypto.log")
+            msg.attach(file)
+        s = smtplib.SMTP('smtp.naver.com', 587)
+        s.starttls()
+        s.login(NAVER_ID, NAVER_PASSWORD)
+        s.sendmail(SMTP_FROM, SMTP_TO, msg.as_string())
+        s.close()

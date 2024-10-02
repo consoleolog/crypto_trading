@@ -71,11 +71,6 @@ def App():
             """)
 
         if crypto_service.get_balances() != 0:
-            log.info(f"""
-                =====================
-                #   이익 추정 구간  #   
-                =====================
-                """)
             profit = crypto_service.get_profit()
             log.info(f"""
                 ====================================================
