@@ -64,11 +64,11 @@ class TradingService:
                 self.tradingRepository.save_result(msg, "BUY")
                 self.mailService.send_file({
                     "content":f"{self.TICKER} 매수 결과 보고",
-                    "filename":f"{self.TICKER}_buy.csv"
+                    "filename":"buy.csv"
                 })
                 self.mailService.send_file({
                     "content":f"{self.TICKER} 매수 결과 보고",
-                    "filename":f"{self.TICKER}_buy_sell.csv"
+                    "filename":"buy_sell.csv"
                 })
         else:
             return "ALREADY_BUY"
@@ -84,16 +84,22 @@ class TradingService:
             self.tradingRepository.save_result(msg, "SELL")
             self.mailService.send_file({
                 "content": f"{self.TICKER} 매수 결과 보고",
-                "filename": f"{self.TICKER}_buy_sell.csv"
+                "filename": "buy_sell.csv"
             })
 
+    def init(self):
+        self.tradingRepository.create_file()
+        self.cryptoRepository.create_file()
 
     def get_profit(self):
         data = self.tradingRepository.get_trade_history()
         return (pyupbit.get_current_price(f"KRW-{self.TICKER}") - data["market_price"]) /data["market_price"] * 100
 
-    def STAGE1(self):
-        """
-
-        :return:
-        """
+    @staticmethod
+    def buy_or_sell(data):
+        if ((data['macd_10_20_slope'].iloc[-1] >= data['macd_10_20_slope'].iloc[-2] >= data['macd_10_20_slope'].iloc[
+            -3]) and
+                (data['macd_10_60_slope'].iloc[-1] >= data['macd_10_60_slope'].iloc[-2] >= data['macd_10_20_slope'].iloc[
+                    -3]) and
+                data['macd_20_60_slope'].iloc[-1] >= data['macd_20_60_slope'].iloc[-2]):
+            return "BUY"

@@ -7,8 +7,8 @@ class CryptoRepository:
         self.TICKER = ticker
 
     def create_file(self):
-        if not os.path.exists(f"{self.data_dir}/{self.TICKER}_data.csv"):
-            with open(f"{self.data_dir}/{self.TICKER}_data.csv", "w", encoding="utf-8") as f:
+        if not os.path.exists(f"{self.data_dir}/{self.TICKER}/data.csv"):
+            with open(f"{self.data_dir}/{self.TICKER}/data.csv", "w", encoding="utf-8") as f:
                 f.write("date")
                 f.write(",close")
                 f.write(",stage")
@@ -29,7 +29,7 @@ class CryptoRepository:
 
 
     def save_data(self, data, stage):
-        with open(f'{self.data_dir}/{self.TICKER}_data.csv', 'a', encoding='utf-8') as f:
+        with open(f'{self.data_dir}/{self.TICKER}/data.csv', 'a', encoding='utf-8') as f:
             f.write(f"\n{data['date'].iloc[-1]}")
             f.write(f",{data['close'].iloc[-1]}")
             f.write(f",{stage}")

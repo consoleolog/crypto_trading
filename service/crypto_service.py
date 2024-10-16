@@ -19,16 +19,16 @@ class CryptoService:
                     return 0
         return 0
 
-    def EMA(self, interval, count):
+    def EMA(self, interval, count, ema_options):
         data = pyupbit.get_ohlcv(
             ticker=f"KRW-{self.TICKER}",
             interval=interval,
             count=count
         )
 
-        data["ema_short"] = data["close"].ewm(span=10, adjust=False, min_periods=10).mean().dropna().astype(int)
-        data["ema_middle"] = data["close"].ewm(span=20, adjust=False, min_periods=20).mean().dropna().astype(int)
-        data["ema_long"] = data["close"].ewm(span=60, adjust=False, min_periods=60).mean().dropna().astype(int)
+        data["ema_short"] = data["close"].ewm(span=ema_options["short"], adjust=False, min_periods=ema_options["short"]).mean().dropna().astype(int)
+        data["ema_middle"] = data["close"].ewm(span=ema_options["middle"], adjust=False, min_periods=ema_options["middle"]).mean().dropna().astype(int)
+        data["ema_long"] = data["close"].ewm(span=ema_options["long"], adjust=False, min_periods=ema_options["long"]).mean().dropna().astype(int)
 
         data["macd_short"] = data["ema_short"] - data["ema_middle"]
         data["macd_middle"] = data["ema_short"] - data["ema_long"]

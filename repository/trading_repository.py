@@ -13,13 +13,13 @@ class TradingRepository:
         self.log = get_logger(f"{self.TICKER}")
 
     def get_trade_history(self):
-        data = pd.read_csv(f"{self.data_dir}/{self.TICKER}_buy.csv", encoding="utf-8")
+        data = pd.read_csv(f"{self.data_dir}/{self.TICKER}/buy.csv", encoding="utf-8")
         return data.iloc[-1]
 
     def create_file(self):
-        if not os.path.exists(f"{self.data_dir}/{self.TICKER}_buy.csv"):
-            self.log.debug(f"create {self.TICKER}_buy.csv file.....")
-            with open(f"{self.data_dir}/{self.TICKER}_buy.csv", "w", encoding="utf-8") as f:
+        if not os.path.exists(f"{self.data_dir}/{self.TICKER}/buy.csv"):
+            self.log.debug(f"create {self.TICKER} csv files.....")
+            with open(f"{self.data_dir}/{self.TICKER}/buy.csv", "w", encoding="utf-8") as f:
                 f.write("date")
                 f.write(",ticker")
                 f.write(",my_price")
@@ -27,10 +27,8 @@ class TradingRepository:
                 f.write(",balance")
                 f.write(",reason")
                 f.close()
-
-        if not os.path.exists(f"{self.data_dir}/{self.TICKER}_buy_sell.csv"):
-            self.log.debug(f"create {self.TICKER}_buy_sell.csv file.....")
-            with open(f"{self.data_dir}/{self.TICKER}_buy_sell.csv", "w", encoding="utf-8") as f:
+        if not os.path.exists(f"{self.data_dir}/{self.TICKER}/buy_sell.csv"):
+            with open(f"{self.data_dir}/{self.TICKER}/buy_sell.csv", "w", encoding="utf-8") as f:
                 f.write("date")
                 f.write(",ticker")
                 f.write(",buy/sell")
@@ -48,7 +46,7 @@ class TradingRepository:
 
         fdt = dt.strftime(datefmt)
 
-        with open(f"{self.data_dir}/{self.TICKER}_buy_sell.csv", "a", encoding="utf-8") as f:
+        with open(f"{self.data_dir}/{self.TICKER}/buy_sell.csv", "a", encoding="utf-8") as f:
             f.write(f"\n{fdt}")
             f.write(f",{code}")
             f.write(f",{msg['market']}")
@@ -57,7 +55,7 @@ class TradingRepository:
             f.write(f",{msg['balance']}")
 
         if code == "BUY":
-            with open(f"{self.data_dir}/{self.TICKER}_buy.csv","a", encoding="utf-8") as f:
+            with open(f"{self.data_dir}/{self.TICKER}/buy.csv","a", encoding="utf-8") as f:
                 f.write(f"\n{fdt}")
                 f.write(f",{msg['market']}")
                 f.write(f",{msg['locked']}")

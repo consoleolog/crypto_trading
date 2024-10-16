@@ -24,7 +24,7 @@ class MailService:
         msg['To'] = SMTP_TO
         part = MIMEText(f"<h4>{inputs['content']}</h4>", 'html')
         msg.attach(part)
-        with open(f"{self.root_dir}/data/{inputs['filename']}", 'rb') as f:
+        with open(f"{self.root_dir}/data/{self.TICKER}/{inputs['filename']}", 'rb') as f:
             file = MIMEBase("application", "octet-stream")
             file.set_payload(f.read())
             encoders.encode_base64(file)
