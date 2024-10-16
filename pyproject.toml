@@ -14,8 +14,6 @@ langchain-openai = "^0.2.0"
 langchain-core = "^0.3.2"
 pydantic = "^2.9.2"
 langchain-community = "^0.3.0"
-dependency-injector = "^4.42.0"
-schedule = "^1.2.2"
 
 
 [build-system]
