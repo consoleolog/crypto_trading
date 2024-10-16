@@ -1,13 +1,13 @@
 import json
 
-from config import *
+from config import OPENAI_API_KEY
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
-from logger import log
-
 from langchain.schema import BaseOutputParser
+
+from logger import get_logger
 
 
 class JsonOutputParser(BaseOutputParser):
@@ -16,8 +16,10 @@ class JsonOutputParser(BaseOutputParser):
         return json.loads(text)
 
 class LLmService:
-    def __init__(self):
+    def __init__(self, ticker):
         self.output_parser = JsonOutputParser()
+        self.TICKER = ticker
+        self.log = get_logger(f"{self.TICKER}")
 
         self.model = ChatOpenAI(
             openai_api_key=OPENAI_API_KEY,
@@ -71,7 +73,7 @@ class LLmService:
         result = chain.invoke({
             "data": inputs['data']
         })
-        log.debug(f"""
+        self.log.debug(f"""
         ==============================================================================================================================      
           ** 매매 분석 **
           $$ {result['reason']}

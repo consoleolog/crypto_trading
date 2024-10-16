@@ -1,6 +1,4 @@
-import time
 import logging
-import os
 from config import *
 
 fmt = "[%(levelname)s] %(asctime)s : %(filename)s : %(module)s : %(lineno)d - %(message)s"
@@ -13,7 +11,7 @@ def get_logger(logging_service="undefined"):
     logger = logging.getLogger(f"{logging_service}_logger")
     logger.setLevel(logging.DEBUG)
     logger.propagate = False
-    log_dir = LOG_DIR
+    log_dir = f"{os.getcwd()}/logs"
     if not os.path.exists(log_dir):
         os.mkdir(log_dir)
 
@@ -58,5 +56,3 @@ class CustomFormatter(logging.Formatter):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt, datefmt=datefmt)
         return formatter.format(record)
-
-log = get_logger(f"crypto")

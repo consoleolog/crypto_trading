@@ -1,18 +1,34 @@
 import time
-
-import schedule
+from multiprocessing.dummy import Pool as ThreadPool
 
 from app import App
+from logger import get_logger
 
-from service.mail_service import MailService
 
-schedule.every(5).seconds.do(App)
+def main(ticker):
 
-mail_service = MailService()
+    log = get_logger(f"{ticker}")
 
-schedule.every(1).hours.do(mail_service.send_mail, "데이터 백업")
+    container = App(ticker)
+
+    crypto_repository = container["cryptoRepository"]
+    trading_repository = container["tradingRepository"]
+
+    crypto_repository.create_file()
+    trading_repository.create_file()
+
+    while True:
+        trading_service = container["tradingService"]
+        data = trading_service.EMA("day1", 180)
+        get_stage = trading_service.get_stage(data)
+        time.sleep(5)
+
 
 if __name__ == '__main__':
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+
+    tickers = ["BTC","ETH","BCH"]
+
+    pool = ThreadPool(len(tickers))
+    result = pool.map(main,tickers)
+    pool.close()
+    pool.join()
