@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
 
+import pandas as pd
+
 from logger import get_logger
 
 
@@ -9,6 +11,10 @@ class TradingRepository:
         self.data_dir = f'{os.getcwd()}/data'
         self.TICKER = ticker
         self.log = get_logger(f"{self.TICKER}")
+
+    def get_trade_history(self):
+        data = pd.read_csv(f"{self.data_dir}/{self.TICKER}_buy.csv", encoding="utf-8")
+        return data.iloc[-1]
 
     def create_file(self):
         if not os.path.exists(f"{self.data_dir}/{self.TICKER}_buy.csv"):

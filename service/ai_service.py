@@ -26,7 +26,15 @@ class LLmService:
             model='gpt-4o-mini'
         )
 
-    def buy_or_sell(self, inputs):
+    def trading(self, inputs):
+
+        data = inputs["data"]
+        data.drop(["close",
+                   "ema_short","ema_middle","ema_long",
+                   "macd_short","macd_middle","macd_long"
+                   ], axis=1, inplace=True)
+        data.dropna(inplace=True)
+
         template = ChatPromptTemplate.from_messages([
             ("system",
              """
@@ -71,7 +79,7 @@ class LLmService:
 
         chain = template | self.model | self.output_parser
         result = chain.invoke({
-            "data": inputs['data']
+            "data": data
         })
         self.log.debug(f"""
         ==============================================================================================================================      

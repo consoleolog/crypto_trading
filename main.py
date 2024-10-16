@@ -19,7 +19,8 @@ def main(ticker):
 
     while True:
         trading_service = container["tradingService"]
-        data = trading_service.EMA("day1", 180)
+        crypto_service = container["cryptoService"]
+        data = crypto_service.EMA("minute10", 180)
         get_stage = trading_service.get_stage(data)
         time.sleep(5)
 
