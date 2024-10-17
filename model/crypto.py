@@ -1,0 +1,17 @@
+class Crypto:
+    def __init__(self, data):
+        self.date = data["date"].iloc[-1]
+        self.close = data["close"].iloc[-1]
+        self.ema_short = data["ema_short"].iloc[-1]
+        self.ema_middle = data["ema_middle"].iloc[-1]
+        self.ema_long = data["ema_long"].iloc[-1]
+        self.macd_short = data["macd_short"].iloc[-1]
+        self.macd_middle = data["macd_middle"].iloc[-1]
+        self.macd_long = data["macd_long"].iloc[-1]
+        self.close_slope = data["close_slope"].iloc[-1]
+        self.ema_short_slope = data["ema_short_slope"].iloc[-1]
+        self.ema_middle_slope = data["ema_middle_slope"].iloc[-1]
+        self.ema_long_slope = data["ema_long_slope"].iloc[-1]
+        self.macd_short_slope = data["macd_short_slope"].iloc[-1]
+        self.macd_middle_slope = data["macd_middle_slope"].iloc[-1]
+        self.macd_long_slope = data["macd_long_slope"].iloc[-1]

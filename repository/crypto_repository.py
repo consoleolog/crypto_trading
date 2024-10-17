@@ -2,6 +2,8 @@ import os
 
 import pandas as pd
 
+from model.crypto import Crypto
+
 
 class CryptoRepository:
     def __init__(self, ticker):
@@ -32,8 +34,27 @@ class CryptoRepository:
                 f.write(",macd_long_slope")
                 f.close()
 
+    def save(self, crypto: Crypto, stage):
+        with open(f'{self.data_dir}/{self.TICKER}/data.csv', 'a', encoding='utf-8') as f:
+            f.write(f"\n{crypto.date}")
+            f.write(f",{crypto.close}")
+            f.write(f",{stage}")
+            f.write(f",{crypto.ema_short}")
+            f.write(f",{crypto.ema_middle}")
+            f.write(f",{crypto.ema_long}")
+            f.write(f",{crypto.macd_short}")
+            f.write(f",{crypto.macd_middle}")
+            f.write(f",{crypto.macd_long}")
+            f.write(f",{crypto.close_slope}")
+            f.write(f",{crypto.ema_short_slope}")
+            f.write(f",{crypto.ema_middle_slope}")
+            f.write(f",{crypto.ema_long_slope}")
+            f.write(f",{crypto.macd_short_slope}")
+            f.write(f",{crypto.macd_middle_slope}")
+            f.write(f",{crypto.macd_long_slope}")
 
     def save_data(self, data, stage):
+
         with open(f'{self.data_dir}/{self.TICKER}/data.csv', 'a', encoding='utf-8') as f:
             f.write(f"\n{data['date'].iloc[-1]}")
             f.write(f",{data['close'].iloc[-1]}")
