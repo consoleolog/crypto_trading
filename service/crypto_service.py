@@ -26,9 +26,9 @@ class CryptoService:
             count=count
         )
 
-        data["ema_short"] = data["close"].ewm(span=ema_options["short"], adjust=False, min_periods=ema_options["short"]).mean().dropna().astype(int)
-        data["ema_middle"] = data["close"].ewm(span=ema_options["middle"], adjust=False, min_periods=ema_options["middle"]).mean().dropna().astype(int)
-        data["ema_long"] = data["close"].ewm(span=ema_options["long"], adjust=False, min_periods=ema_options["long"]).mean().dropna().astype(int)
+        data["ema_short"] = data["close"].ewm(span=ema_options["short"], min_periods=ema_options["short"]).mean().dropna().astype(int)
+        data["ema_middle"] = data["close"].ewm(span=ema_options["middle"], min_periods=ema_options["middle"]).mean().dropna().astype(int)
+        data["ema_long"] = data["close"].ewm(span=ema_options["long"], min_periods=ema_options["long"]).mean().dropna().astype(int)
 
         data["macd_short"] = data["ema_short"] - data["ema_middle"]
         data["macd_middle"] = data["ema_short"] - data["ema_long"]

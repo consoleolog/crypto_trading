@@ -14,7 +14,7 @@ class MailService:
     def __init__(self, ticker):
         self.root_dir = os.getcwd()
         self.TICKER = ticker
-        self.log = get_logger(f"{self.TICKER}")
+        self.log = get_logger(self.TICKER)
 
     def send_file(self, inputs):
         self.log.debug(f"sending {self.TICKER} mail....")

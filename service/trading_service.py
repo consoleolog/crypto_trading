@@ -3,6 +3,8 @@ from pyupbit import Upbit
 
 from config import UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY
 from logger import get_logger
+from model.crypto import Crypto
+from model.trade import Trade
 from repository.crypto_repository import CryptoRepository
 from repository.trading_repository import TradingRepository
 from service.crypto_service import CryptoService
@@ -21,7 +23,7 @@ class TradingService:
         self.tradingRepository = trading_repository
         self.mailService = mail_service,
         self.cryptoService = crypto_service
-        self.log = get_logger(f"{self.TICKER}")
+        self.log = get_logger(self.TICKER)
 
     def get_stage(self, data):
         data['close_slope'] = data['close'].diff()
@@ -51,7 +53,8 @@ class TradingService:
             result["stage"] = 6
         else:
             return Exception("STAGE_NOT_FOUND")
-        self.cryptoRepository.save_data(data, result["stage"])
+
+        self.cryptoRepository.save(Crypto(data), result["stage"])
         return result
 
     def BUY(self, inputs):
@@ -61,7 +64,8 @@ class TradingService:
                 return "ALREADY_BUY"
             if isinstance(msg, dict):
                 msg['market_price'] = pyupbit.get_current_price(f"KRW-{self.TICKER}")
-                self.tradingRepository.save_result(msg, "BUY")
+
+                self.tradingRepository.save(Trade(msg), "BUY")
                 self.mailService.send_file({
                     "content":f"{self.TICKER} 매수 결과 보고",
                     "filename":"buy.csv"
@@ -81,7 +85,7 @@ class TradingService:
             msg['market_price'] = pyupbit.get_current_price(f"KRW-{self.TICKER}")
             msg['locked'] = 0
             msg['balance'] = 0
-            self.tradingRepository.save_result(msg, "SELL")
+            self.tradingRepository.save_result(Trade(msg), "SELL")
             self.mailService.send_file({
                 "content": f"{self.TICKER} 매수 결과 보고",
                 "filename": "buy_sell.csv"
@@ -103,3 +107,46 @@ class TradingService:
                     -3]) and
                 data['macd_20_60_slope'].iloc[-1] >= data['macd_20_60_slope'].iloc[-2]):
             return "BUY"
+
+    def compare(self):
+
+        result = {}
+
+        data = self.cryptoRepository.get_history()
+        if ((data["macd_short"].iloc[-1] > data["macd_short"].iloc[-3]) and
+            (data["macd_short"].iloc[-2] > data["macd_short"].iloc[-4]) and
+            (data["macd_short"].iloc[-3] > data["macd_short"].iloc[-5])):
+            result["short"] = "BUY"
+
+        if ((data["macd_middle"].iloc[-1] > data["macd_middle"].iloc[-3]) and
+            (data["macd_middle"].iloc[-2] > data["macd_middle"].iloc[-4]) and
+            (data["macd_middle"].iloc[-3] > data["macd_middle"].iloc[-5])):
+            result["middle"] = "BUY"
+
+        if ((data["macd_long"].iloc[-1] > data["macd_long"].iloc[-3]) and
+            (data["macd_long"].iloc[-2] > data["macd_long"].iloc[-4]) and
+            (data["macd_long"].iloc[-3] > data["macd_long"].iloc[-5])):
+            result["long"] = "BUY"
+
+        if ((data["macd_short"].iloc[-1] < data["macd_short"].iloc[-3]) and
+                (data["macd_short"].iloc[-2] < data["macd_short"].iloc[-4]) and
+                (data["macd_short"].iloc[-3] < data["macd_short"].iloc[-5])):
+            result["short"] = "SELL"
+
+        if ((data["macd_middle"].iloc[-1] < data["macd_middle"].iloc[-3]) and
+                (data["macd_middle"].iloc[-2] < data["macd_middle"].iloc[-4]) and
+                (data["macd_middle"].iloc[-3] < data["macd_middle"].iloc[-5])):
+            result["middle"] = "SELL"
+
+        if ((data["macd_long"].iloc[-1] < data["macd_long"].iloc[-3]) and
+                (data["macd_long"].iloc[-2] < data["macd_long"].iloc[-4]) and
+                (data["macd_long"].iloc[-3] < data["macd_long"].iloc[-5])):
+            result["long"] = "SELL"
+
+        if result["short"] == "BUY" and result["middle"] == "BUY" and result ["long"] == "BUY":
+            return "BUY"
+        elif result["short"] == "SELL" and result["middle"] == "SELL" and result ["long"] == "SELL":
+            return "SELL"
+        else :
+            return "None"
+

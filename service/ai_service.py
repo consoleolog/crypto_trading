@@ -19,7 +19,7 @@ class LLmService:
     def __init__(self, ticker):
         self.output_parser = JsonOutputParser()
         self.TICKER = ticker
-        self.log = get_logger(f"{self.TICKER}")
+        self.log = get_logger(self.TICKER)
 
         self.model = ChatOpenAI(
             openai_api_key=OPENAI_API_KEY,
@@ -31,7 +31,7 @@ class LLmService:
         data = inputs["data"]
         data.drop(["close",
                    "ema_short","ema_middle","ema_long",
-                   "macd_short","macd_middle","macd_long"
+                   "macd_short_slope","macd_middle_slope","macd_long_slope"
                    ], axis=1, inplace=True)
         data.dropna(inplace=True)
 
