@@ -10,7 +10,7 @@ class TradingRepository:
     def __init__(self, ticker):
         self.data_dir = f'{os.getcwd()}/data'
         self.TICKER = ticker
-        self.log = get_logger(f"{self.TICKER}")
+        self.log = get_logger(self.TICKER)
 
     def get_trade_history(self):
         data = pd.read_csv(f"{self.data_dir}/{self.TICKER}/buy.csv", encoding="utf-8")

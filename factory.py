@@ -5,7 +5,7 @@ from service.crypto_service import CryptoService
 from service.mail_service import MailService
 from service.trading_service import TradingService
 
-def App(ticker):
+def Factory(ticker):
 
     crypto_repository = CryptoRepository(ticker)
     trading_repository = TradingRepository(ticker)

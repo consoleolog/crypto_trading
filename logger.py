@@ -1,5 +1,5 @@
 import logging
-from config import *
+import os
 
 fmt = "[%(levelname)s] %(asctime)s : %(filename)s : %(module)s : %(lineno)d - %(message)s"
 

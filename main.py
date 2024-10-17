@@ -4,11 +4,15 @@ from multiprocessing.dummy import Pool as ThreadPool
 
 from langchain_community.document_loaders import DataFrameLoader
 
-from app import App
+from factory import Factory
+from logger import get_logger
+
 
 def main(ticker):
 
-    container = App(ticker)
+    log = get_logger(ticker)
+
+    container = Factory(ticker)
     trading_service = container["tradingService"]
     crypto_service = container["cryptoService"]
     llm_service = container["llmService"]
@@ -18,16 +22,23 @@ def main(ticker):
 
     trading_service.init()
 
+    counter = 0
+
     while True:
 
-        data = crypto_service.EMA("minute60", 180, {
-            "short":7,
-            "middle":28,
-            "long":56,
+        data = crypto_service.EMA("minute1", 180, {
+            "short":10,
+            "middle":20,
+            "long":60,
         })
         get_stage = trading_service.get_stage(data)
 
-        if (get_stage["stage"] == 1 or get_stage["stage"] == 6) and crypto_service.get_my_crypto() != 0:
+        counter += 1
+
+        if counter == 5:
+            log.info("trading starting......")
+
+        if (get_stage["stage"] == 1 or get_stage["stage"] == 6) and crypto_service.get_my_crypto() != 0 and counter > 5:
 
             data = data.copy()
             data["date"] = data["date"].astype(str)
@@ -35,21 +46,26 @@ def main(ticker):
 
             df = loader.load()
 
-            trade = llm_service.trading({
-                "data":df,
-            })
+            buy_or_sell = trading_service.compare()
 
-            if trade["result"] == "BUY" and crypto_service.get_my_crypto() == 0:
-                trading_service.BUY({
-                    "price": 6000,
+            if buy_or_sell == "BUY":
+                trade = llm_service.trading({
+                    "data":df,
                 })
-
-
-            if trade["result"] == "SELL" and trading_service.get_profit() > 0.8 :
-                trading_service.SELL({
-                    "amount": crypto_service.get_my_crypto()
+                if trade["result"] == "BUY" and crypto_service.get_my_crypto() == 0:
+                    log.debug("buying........")
+                    trading_service.BUY({
+                        "price": 6000,
+                    })
+            elif buy_or_sell == "SELL":
+                trade = llm_service.trading({
+                    "data":df,
                 })
-
+                if trade["result"] == "SELL" and trading_service.get_profit() > 0.8 :
+                    log.debug("selling......")
+                    trading_service.SELL({
+                        "amount": crypto_service.get_my_crypto()
+                    })
         time.sleep(60)
 
 

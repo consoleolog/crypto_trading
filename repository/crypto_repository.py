@@ -1,10 +1,15 @@
 import os
 
+import pandas as pd
+
 
 class CryptoRepository:
     def __init__(self, ticker):
         self.data_dir = f'{os.getcwd()}/data'
         self.TICKER = ticker
+
+    def get_history(self):
+        return pd.read_csv(f"{self.data_dir}/{self.TICKER}/data.csv", encoding='utf-8')
 
     def create_file(self):
         if not os.path.exists(f"{self.data_dir}/{self.TICKER}/data.csv"):
