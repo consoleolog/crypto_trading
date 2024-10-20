@@ -21,7 +21,7 @@ class TradingService:
         self.UPBIT = Upbit(UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY)
         self.cryptoRepository = crypto_repository
         self.tradingRepository = trading_repository
-        self.mailService = mail_service,
+        self.mailService = mail_service
         self.cryptoService = crypto_service
         self.log = get_logger(self.TICKER)
 
@@ -57,9 +57,9 @@ class TradingService:
         self.cryptoRepository.save(Crypto(data), result["stage"])
         return result
 
-    def BUY(self, inputs):
+    def BUY(self, price: int):
         if self.cryptoService.get_my_crypto() == 0:
-            msg = self.UPBIT.buy_market_order(f"KRW-{self.TICKER}", inputs['price'])
+            msg = self.UPBIT.buy_market_order(f"KRW-{self.TICKER}", price)
             if msg is None:
                 return "ALREADY_BUY"
             if isinstance(msg, dict):
@@ -77,15 +77,14 @@ class TradingService:
         else:
             return "ALREADY_BUY"
 
-    def SELL(self, inputs):
-        msg = self.UPBIT.sell_market_order(f"KRW-{self.TICKER}", inputs['amount'])
+    def SELL(self):
+        msg = self.UPBIT.sell_market_order(f"KRW-{self.TICKER}", self.cryptoService.get_my_crypto())
         if isinstance(msg, dict) and 'error' in msg:
             return "ALREADY_SELL"
         if isinstance(msg, dict):
             msg['market_price'] = pyupbit.get_current_price(f"KRW-{self.TICKER}")
             msg['locked'] = 0
-            msg['balance'] = 0
-            self.tradingRepository.save_result(Trade(msg), "SELL")
+            self.tradingRepository.save(Trade(msg), "SELL")
             self.mailService.send_file({
                 "content": f"{self.TICKER} 매수 결과 보고",
                 "filename": "buy_sell.csv"

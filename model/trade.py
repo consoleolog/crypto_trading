@@ -4,4 +4,3 @@ class Trade:
         self.ticker = data["market"]
         self.price = data["locked"]
         self.market_price = data["market_price"]
-        self.balance = data["balance"]

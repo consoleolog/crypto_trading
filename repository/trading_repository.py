@@ -25,8 +25,6 @@ class TradingRepository:
                 f.write(",ticker")
                 f.write(",my_price")
                 f.write(",market_price")
-                f.write(",balance")
-                f.write(",reason")
                 f.close()
         if not os.path.exists(f"{self.data_dir}/{self.TICKER}/buy_sell.csv"):
             with open(f"{self.data_dir}/{self.TICKER}/buy_sell.csv", "w", encoding="utf-8") as f:
@@ -35,8 +33,6 @@ class TradingRepository:
                 f.write(",buy/sell")
                 f.write(",my_price")
                 f.write(",market_price")
-                f.write(",balance")
-                f.write(",reason")
                 f.close()
 
     def save(self, trade: Trade, code):
@@ -52,7 +48,6 @@ class TradingRepository:
             f.write(f",{code}")
             f.write(f",{trade.price}")
             f.write(f",{trade.market_price}")
-            f.write(f",{trade.balance}")
 
         if code == "BUY":
             with open(f"{self.data_dir}/{self.TICKER}/buy.csv","a", encoding="utf-8") as f:
@@ -60,7 +55,6 @@ class TradingRepository:
                 f.write(f",{trade.ticker}")
                 f.write(f",{trade.price}")
                 f.write(f",{trade.market_price}")
-                f.write(f",{trade.balance}")
 
     def save_result(self, msg, code):
         datefmt = '%Y-%m-%d %H:%M:%S'
@@ -75,7 +69,6 @@ class TradingRepository:
             f.write(f",{code}")
             f.write(f",{msg['locked']}")
             f.write(f",{msg['market_price']}")
-            f.write(f",{msg['balance']}")
 
         if code == "BUY":
             with open(f"{self.data_dir}/{self.TICKER}/buy.csv","a", encoding="utf-8") as f:
@@ -83,4 +76,3 @@ class TradingRepository:
                 f.write(f",{msg['market']}")
                 f.write(f",{msg['locked']}")
                 f.write(f",{msg['market_price']}")
-                f.write(f",{msg['balance']}")
