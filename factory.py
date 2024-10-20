@@ -25,7 +25,7 @@ def Factory(ticker):
         "tradingRepository": trading_repository,
         "tradingService": trading_service,
         "cryptoService": crypto_service,
-        "llmService": llm_service
+        "llmService": llm_service,
     }
 
 
