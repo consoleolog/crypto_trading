@@ -33,32 +33,28 @@ def main(ticker: str):
         counter += 1
 
         if counter == 5:
-            log.info("trading starting......")
+            log.info("start trading......")
 
-        if (get_stage["stage"] == 1 or get_stage["stage"] == 6) and crypto_service.get_my_crypto() != 0 and counter > 5:
+        data = data.copy()
+        data["date"] = data["date"].astype(str)
+        loader = DataFrameLoader(data, page_content_column="date")
 
-            data = data.copy()
-            data["date"] = data["date"].astype(str)
-            loader = DataFrameLoader(data, page_content_column="date")
+        df = loader.load()
 
-            df = loader.load()
-
-            buy_or_sell = trading_service.compare()
-
-            if buy_or_sell == "BUY":
-                trade = llm_service.trading({
-                    "data":df,
-                })
-                if trade["result"] == "BUY" and crypto_service.get_my_crypto() == 0:
+        # 매수 검토
+        if (get_stage["stage"] == 4 or get_stage["stage"] == 5 or get_stage["stage"] == 6) and counter > 5 and crypto_service.get_my_crypto() != 0:
+            if trading_service.for_buy(get_stage["stage"]):
+                if llm_service.for_buy({"data":df})["result"]:
                     log.debug("buying........")
                     trading_service.BUY(6000)
-            elif buy_or_sell == "SELL":
-                trade = llm_service.trading({
-                    "data":df,
-                })
-                if trade["result"] == "SELL" and trading_service.get_profit() > 0.8 :
+
+        # 매도 검토
+        if (get_stage["stage"] == 1 or get_stage["stage"] == 2 or get_stage["stage"] == 3) and counter > 5 and crypto_service.get_my_crypto() != 0:
+            if trading_service.for_sell(get_stage["stage"]):
+                if llm_service.for_sell({"data":df})["result"]:
                     log.debug("selling......")
                     trading_service.SELL()
+
         time.sleep(60)
 
 

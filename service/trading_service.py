@@ -107,50 +107,36 @@ class TradingService:
         data = self.tradingRepository.get_trade_history()
         return (pyupbit.get_current_price(f"KRW-{self.TICKER}") - data["market_price"]) /data["market_price"] * 100
 
-    def compare(self):
-
-        result = {}
-
+    def compare_for_buy(self, key: str, n: int) -> bool:
         data = self.cryptoRepository.get_history()
-        if ((data["macd_upper"].iloc[-1] > data["macd_upper"].iloc[-3]) and
-            (data["macd_upper"].iloc[-2] > data["macd_upper"].iloc[-4]) and
-            (data["macd_upper"].iloc[-3] > data["macd_upper"].iloc[-5])):
-            result["upper"] = "BUY"
+        for i in range(0, n):
+            if not (data[key].iloc[-(i + 1)] > data[key].iloc[-(i + 2)]):
+                return False
+        return True
 
-        if ((data["macd_middle"].iloc[-1] > data["macd_middle"].iloc[-3]) and
-            (data["macd_middle"].iloc[-2] > data["macd_middle"].iloc[-4]) and
-            (data["macd_middle"].iloc[-3] > data["macd_middle"].iloc[-5])):
-            result["middle"] = "BUY"
+    def compare_for_sell(self, key: str, n: int) -> bool:
+        data = self.cryptoRepository.get_history()
+        for i in range(0, n):
+            if not (data[key].iloc[-(i + 1)] < data[key].iloc[-(i + 2)]):
+                return False
+        return True
 
-        if ((data["macd_lower"].iloc[-1] > data["macd_lower"].iloc[-3]) and
-            (data["macd_lower"].iloc[-2] > data["macd_lower"].iloc[-4]) and
-            (data["macd_lower"].iloc[-3] > data["macd_lower"].iloc[-5])):
-            result["lower"] = "BUY"
+    def for_buy(self, stage:int) -> bool:
+        if stage == 4 and (self.compare_for_buy("macd_upper",4) and self.compare_for_buy("macd_middle",4) and self.compare_for_buy("macd_lower", 4)):
+            return True
+        elif stage == 5 and(self.compare_for_buy("macd_upper",4) and self.compare_for_buy("macd_middle",4) and self.compare_for_buy("macd_lower", 3)):
+            return True
+        elif stage == 6 and self.compare_for_buy("macd_upper", 4) and self.compare_for_buy("macd_middle", 3) and self.compare_for_buy("macd_lower", 3):
+            return True
+        else:
+            return False
 
-        if ((data["macd_upper"].iloc[-1] < data["macd_upper"].iloc[-3]) and
-                (data["macd_upper"].iloc[-2] < data["macd_upper"].iloc[-4]) and
-                (data["macd_upper"].iloc[-3] < data["macd_upper"].iloc[-5])):
-            result["upper"] = "SELL"
-
-        if ((data["macd_middle"].iloc[-1] < data["macd_middle"].iloc[-3]) and
-                (data["macd_middle"].iloc[-2] < data["macd_middle"].iloc[-4]) and
-                (data["macd_middle"].iloc[-3] < data["macd_middle"].iloc[-5])):
-            result["middle"] = "SELL"
-
-        if ((data["macd_lower"].iloc[-1] < data["macd_lower"].iloc[-3]) and
-                (data["macd_lower"].iloc[-2] < data["macd_lower"].iloc[-4]) and
-                (data["macd_lower"].iloc[-3] < data["macd_lower"].iloc[-5])):
-            result["lower"] = "SELL"
-
-        if result["upper"] == "BUY" and result["middle"] == "BUY" and result ["lower"] == "BUY":
-            return "BUY"
-        elif result["upper"] == "SELL" and result["middle"] == "SELL" and result ["lower"] == "SELL":
-            return "SELL"
-        else :
-            return "None"
-
-    def can_buy(self, stage):
-        if stage == 1:
-            pass
-
-
+    def for_sell(self, stage:int) -> bool:
+        if stage == 1 and (self.compare_for_sell("macd_upper", 4) and self.compare_for_sell("macd_middle", 4) and self.compare_for_sell("macd_lower", 4)):
+            return True
+        elif stage == 2 and (self.compare_for_sell("macd_upper", 4) and self.compare_for_sell("macd_middle",4) and self.compare_for_sell("macd_lower", 3)):
+            return True
+        elif stage == 3 and self.compare_for_sell("macd_upper",4) and self.compare_for_sell("macd_middle", 3) and self.compare_for_sell("macd_lower", 3):
+            return True
+        else:
+            return False

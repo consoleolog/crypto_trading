@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+from pandas import DataFrame
 
 from model.crypto import Crypto
 
@@ -10,10 +11,10 @@ class CryptoRepository:
         self.data_dir = f'{os.getcwd()}/data'
         self.TICKER = ticker
 
-    def get_history(self)->type(None):
+    def get_history(self) -> DataFrame:
         return pd.read_csv(f"{self.data_dir}/{self.TICKER}/data.csv", encoding='utf-8')
 
-    def create_file(self)->type(None):
+    def create_file(self) -> type(None):
         if not os.path.exists(f"{self.data_dir}/{self.TICKER}/data.csv"):
             with open(f"{self.data_dir}/{self.TICKER}/data.csv", "w", encoding="utf-8") as handler:
                 handler.write("date")
@@ -61,4 +62,3 @@ class CryptoRepository:
             handler.write(f",{crypto.macd_upper_slope}")
             handler.write(f",{crypto.macd_middle_slope}")
             handler.write(f",{crypto.macd_lower_slope}")
-            handler.close()
