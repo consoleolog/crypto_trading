@@ -22,7 +22,7 @@ class CryptoService:
                     return 0
         return 0
 
-    def EMA(self, interval:str, count:int, ema_options: dict[str, int]) -> DataFrame:
+    def EMA(self, interval:str, count:int, ema_options: dict[str, int]):
         data = pyupbit.get_ohlcv(
             ticker=f"KRW-{self.TICKER}",
             interval=interval,

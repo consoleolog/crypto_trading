@@ -1,5 +1,8 @@
 import json
+from logging import Logger
 
+from langchain_community.document_loaders import DataFrameLoader
+from langchain_core.documents import Document
 from pandas import DataFrame
 
 from config import OPENAI_API_KEY
@@ -28,15 +31,25 @@ class LLmService:
             model='gpt-4o-mini'
         )
 
-    def for_buy(self, inputs:dict[str, DataFrame])->dict[str, str]:
-
-        data = inputs["data"]
+    @staticmethod
+    def convert_document(data: DataFrame)->list[Document] :
         data.drop(["close",
                    "ema_short","ema_middle","ema_long",
                    "macd_short_slope","macd_middle_slope","macd_long_slope"], axis=1, inplace=True)
         data.dropna(inplace=True)
 
-        template = ChatPromptTemplate.from_messages([
+        data: DataFrame = data.copy()
+        data["date"]: str = data["date"].astype(str)
+        loader: DataFrameLoader = DataFrameLoader(data, page_content_column="date")
+
+        return loader.load()
+
+
+    def for_buy(self, inputs:dict[str, DataFrame])-> str:
+
+        data: list[Document] = self.convert_document(inputs["data"])
+
+        template: ChatPromptTemplate = ChatPromptTemplate.from_messages([
             ("system",
              """
             너는 암호화폐 전문가야 매수/ 매도 조건을 따라 매수 : BUY 할지, HOLD 할지 결정해줘
@@ -63,28 +76,20 @@ class LLmService:
             분석할 데이터 : {data}    
         """)
         ])
-
-        chain = template | self.model | self.output_parser
-        result = chain.invoke({
-            "data": data
-        })
+        result = (template | self.model | self.output_parser).invoke({"data": data})
         self.log.debug(f"""
         ==============================================================================================================================      
           ** 매매 분석 **
           $$ {result['reason']}
         ==============================================================================================================================  
         """)
-        return result
+        return result["result"]
 
-    def for_sell(self, inputs:dict[str, DataFrame])->dict[str, str]:
+    def for_sell(self, inputs:dict[str, DataFrame])-> str:
 
-        data = inputs["data"]
-        data.drop(["close",
-                   "ema_short","ema_middle","ema_long",
-                   "macd_short_slope","macd_middle_slope","macd_long_slope"], axis=1, inplace=True)
-        data.dropna(inplace=True)
+        data: list[Document] = self.convert_document(inputs["data"])
 
-        template = ChatPromptTemplate.from_messages([
+        template: ChatPromptTemplate = ChatPromptTemplate.from_messages([
             ("system",
              """
             너는 암호화폐 전문가야 매도 조건에 따라 매도 : SELL 할지 , HOLD 할지 결정해줘
@@ -112,15 +117,11 @@ class LLmService:
             분석할 데이터 : {data}    
         """)
         ])
-
-        chain = template | self.model | self.output_parser
-        result = chain.invoke({
-            "data": data
-        })
+        result = (template | self.model | self.output_parser).invoke({"data": data})
         self.log.debug(f"""
         ==============================================================================================================================      
           ** 매매 분석 **
           $$ {result['reason']}
         ==============================================================================================================================  
         """)
-        return result
+        return result["result"]

@@ -28,7 +28,7 @@ class TradingService:
         self.cryptoService = crypto_service
         self.log = get_logger(self.TICKER)
 
-    def get_stage(self, data: DataFrame)-> dict[str, int]:
+    def get_stage(self, data)-> int:
         data['close_slope'] = data['close'].diff()
         data['ema_short_slope'] = data['ema_short'].diff()
         data['ema_middle_slope'] = data['ema_middle'].diff()
@@ -38,9 +38,7 @@ class TradingService:
         data['histogram_middle'] = data['macd_middle'] - data['signal']
         data['histogram_lower'] = data['macd_lower'] - data['signal']
 
-        result = {
-            "stage": 0
-        }
+        result = {}
 
         # 단기 > 중기 > 장기
         if data["ema_short"].iloc[-1] > data["ema_middle"].iloc[-1] > data["ema_long"].iloc[-1]:
@@ -64,7 +62,7 @@ class TradingService:
             raise Exception("NOT_FOUND_STAGE")
 
         self.cryptoRepository.save(Crypto(data), result["stage"])
-        return result
+        return result["stage"]
 
     def BUY(self, price: int) -> type(None):
         if self.cryptoService.get_my_crypto() == 0:
@@ -103,6 +101,9 @@ class TradingService:
         self.tradingRepository.create_file()
         self.cryptoRepository.create_file()
 
+    def data_check(self)-> bool:
+        return len(self.cryptoRepository.get_history()) > 5
+
     def get_profit(self) -> float:
         data = self.tradingRepository.get_trade_history()
         return (pyupbit.get_current_price(f"KRW-{self.TICKER}") - data["market_price"]) /data["market_price"] * 100
@@ -124,19 +125,15 @@ class TradingService:
     def for_buy(self, stage:int) -> bool:
         if stage == 4 and (self.compare_for_buy("macd_upper",4) and self.compare_for_buy("macd_middle",4) and self.compare_for_buy("macd_lower", 4)):
             return True
-        elif stage == 5 and(self.compare_for_buy("macd_upper",4) and self.compare_for_buy("macd_middle",4) and self.compare_for_buy("macd_lower", 3)):
+        if stage == 5 and(self.compare_for_buy("macd_upper",4) and self.compare_for_buy("macd_middle",4) and self.compare_for_buy("macd_lower", 3)):
             return True
-        elif stage == 6 and self.compare_for_buy("macd_upper", 4) and self.compare_for_buy("macd_middle", 3) and self.compare_for_buy("macd_lower", 3):
+        if stage == 6 and self.compare_for_buy("macd_upper", 4) and self.compare_for_buy("macd_middle", 3) and self.compare_for_buy("macd_lower", 3):
             return True
-        else:
-            return False
 
     def for_sell(self, stage:int) -> bool:
         if stage == 1 and (self.compare_for_sell("macd_upper", 4) and self.compare_for_sell("macd_middle", 4) and self.compare_for_sell("macd_lower", 4)):
             return True
-        elif stage == 2 and (self.compare_for_sell("macd_upper", 4) and self.compare_for_sell("macd_middle",4) and self.compare_for_sell("macd_lower", 3)):
+        if stage == 2 and (self.compare_for_sell("macd_upper", 4) and self.compare_for_sell("macd_middle",4) and self.compare_for_sell("macd_lower", 3)):
             return True
-        elif stage == 3 and self.compare_for_sell("macd_upper",4) and self.compare_for_sell("macd_middle", 3) and self.compare_for_sell("macd_lower", 3):
+        if stage == 3 and self.compare_for_sell("macd_upper",4) and self.compare_for_sell("macd_middle", 3) and self.compare_for_sell("macd_lower", 3):
             return True
-        else:
-            return False
