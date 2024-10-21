@@ -1,5 +1,6 @@
 import logging
 import os
+from logging import Logger
 
 fmt = "[%(levelname)s] %(asctime)s : %(filename)s : %(module)s : %(lineno)d - %(message)s"
 
@@ -7,7 +8,7 @@ datefmt = '%Y-%m-%d %H:%M:%S'
 
 filefmt = '%Y%m%d%H%M'
 
-def get_logger(logging_service="undefined"):
+def get_logger(logging_service:str ="undefined")->Logger:
     logger = logging.getLogger(f"{logging_service}_logger")
     logger.setLevel(logging.DEBUG)
     logger.propagate = False

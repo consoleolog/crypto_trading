@@ -1,4 +1,7 @@
+import os.path
+
 import pyupbit
+from pandas import DataFrame
 from pyupbit import Upbit
 
 from config import UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY
@@ -25,13 +28,19 @@ class TradingService:
         self.cryptoService = crypto_service
         self.log = get_logger(self.TICKER)
 
-    def get_stage(self, data):
+    def get_stage(self, data: DataFrame)-> dict[str, int]:
         data['close_slope'] = data['close'].diff()
         data['ema_short_slope'] = data['ema_short'].diff()
         data['ema_middle_slope'] = data['ema_middle'].diff()
         data['ema_long_slope'] = data['ema_long'].diff()
+        data['signal_slope'] = data['signal'].diff()
+        data['histogram_upper'] = data['macd_upper'] - data['signal']
+        data['histogram_middle'] = data['macd_middle'] - data['signal']
+        data['histogram_lower'] = data['macd_lower'] - data['signal']
 
-        result = {}
+        result = {
+            "stage": 0
+        }
 
         # 단기 > 중기 > 장기
         if data["ema_short"].iloc[-1] > data["ema_middle"].iloc[-1] > data["ema_long"].iloc[-1]:
@@ -52,16 +61,14 @@ class TradingService:
         elif data["ema_short"].iloc[-1] > data["ema_long"].iloc[-1] > data["ema_middle"].iloc[-1]:
             result["stage"] = 6
         else:
-            return Exception("STAGE_NOT_FOUND")
+            raise Exception("NOT_FOUND_STAGE")
 
         self.cryptoRepository.save(Crypto(data), result["stage"])
         return result
 
-    def BUY(self, price: int):
+    def BUY(self, price: int) -> type(None):
         if self.cryptoService.get_my_crypto() == 0:
             msg = self.UPBIT.buy_market_order(f"KRW-{self.TICKER}", price)
-            if msg is None:
-                return "ALREADY_BUY"
             if isinstance(msg, dict):
                 msg['market_price'] = pyupbit.get_current_price(f"KRW-{self.TICKER}")
 
@@ -74,78 +81,76 @@ class TradingService:
                     "content":f"{self.TICKER} 매수 결과 보고",
                     "filename":"buy_sell.csv"
                 })
-        else:
-            return "ALREADY_BUY"
 
-    def SELL(self):
+    def SELL(self) -> type(None):
         msg = self.UPBIT.sell_market_order(f"KRW-{self.TICKER}", self.cryptoService.get_my_crypto())
-        if isinstance(msg, dict) and 'error' in msg:
-            return "ALREADY_SELL"
         if isinstance(msg, dict):
             msg['market_price'] = pyupbit.get_current_price(f"KRW-{self.TICKER}")
             msg['locked'] = 0
             self.tradingRepository.save(Trade(msg), "SELL")
             self.mailService.send_file({
-                "content": f"{self.TICKER} 매수 결과 보고",
+                "content": f"{self.TICKER} 매도 결과 보고",
                 "filename": "buy_sell.csv"
             })
 
-    def init(self):
+    def init(self) -> type(None):
+        if not os.path.exists(f"{os.getcwd()}/data"):
+            os.mkdir(f"{os.getcwd()}/data")
+
+        if not os.path.exists(f"{os.getcwd()}/data/{self.TICKER}"):
+            os.mkdir(f"{os.getcwd()}/data/{self.TICKER}")
+
         self.tradingRepository.create_file()
         self.cryptoRepository.create_file()
 
-    def get_profit(self):
+    def get_profit(self) -> float:
         data = self.tradingRepository.get_trade_history()
         return (pyupbit.get_current_price(f"KRW-{self.TICKER}") - data["market_price"]) /data["market_price"] * 100
-
-    @staticmethod
-    def buy_or_sell(data):
-        if ((data['macd_10_20_slope'].iloc[-1] >= data['macd_10_20_slope'].iloc[-2] >= data['macd_10_20_slope'].iloc[
-            -3]) and
-                (data['macd_10_60_slope'].iloc[-1] >= data['macd_10_60_slope'].iloc[-2] >= data['macd_10_20_slope'].iloc[
-                    -3]) and
-                data['macd_20_60_slope'].iloc[-1] >= data['macd_20_60_slope'].iloc[-2]):
-            return "BUY"
 
     def compare(self):
 
         result = {}
 
         data = self.cryptoRepository.get_history()
-        if ((data["macd_short"].iloc[-1] > data["macd_short"].iloc[-3]) and
-            (data["macd_short"].iloc[-2] > data["macd_short"].iloc[-4]) and
-            (data["macd_short"].iloc[-3] > data["macd_short"].iloc[-5])):
-            result["short"] = "BUY"
+        if ((data["macd_upper"].iloc[-1] > data["macd_upper"].iloc[-3]) and
+            (data["macd_upper"].iloc[-2] > data["macd_upper"].iloc[-4]) and
+            (data["macd_upper"].iloc[-3] > data["macd_upper"].iloc[-5])):
+            result["upper"] = "BUY"
 
         if ((data["macd_middle"].iloc[-1] > data["macd_middle"].iloc[-3]) and
             (data["macd_middle"].iloc[-2] > data["macd_middle"].iloc[-4]) and
             (data["macd_middle"].iloc[-3] > data["macd_middle"].iloc[-5])):
             result["middle"] = "BUY"
 
-        if ((data["macd_long"].iloc[-1] > data["macd_long"].iloc[-3]) and
-            (data["macd_long"].iloc[-2] > data["macd_long"].iloc[-4]) and
-            (data["macd_long"].iloc[-3] > data["macd_long"].iloc[-5])):
-            result["long"] = "BUY"
+        if ((data["macd_lower"].iloc[-1] > data["macd_lower"].iloc[-3]) and
+            (data["macd_lower"].iloc[-2] > data["macd_lower"].iloc[-4]) and
+            (data["macd_lower"].iloc[-3] > data["macd_lower"].iloc[-5])):
+            result["lower"] = "BUY"
 
-        if ((data["macd_short"].iloc[-1] < data["macd_short"].iloc[-3]) and
-                (data["macd_short"].iloc[-2] < data["macd_short"].iloc[-4]) and
-                (data["macd_short"].iloc[-3] < data["macd_short"].iloc[-5])):
-            result["short"] = "SELL"
+        if ((data["macd_upper"].iloc[-1] < data["macd_upper"].iloc[-3]) and
+                (data["macd_upper"].iloc[-2] < data["macd_upper"].iloc[-4]) and
+                (data["macd_upper"].iloc[-3] < data["macd_upper"].iloc[-5])):
+            result["upper"] = "SELL"
 
         if ((data["macd_middle"].iloc[-1] < data["macd_middle"].iloc[-3]) and
                 (data["macd_middle"].iloc[-2] < data["macd_middle"].iloc[-4]) and
                 (data["macd_middle"].iloc[-3] < data["macd_middle"].iloc[-5])):
             result["middle"] = "SELL"
 
-        if ((data["macd_long"].iloc[-1] < data["macd_long"].iloc[-3]) and
-                (data["macd_long"].iloc[-2] < data["macd_long"].iloc[-4]) and
-                (data["macd_long"].iloc[-3] < data["macd_long"].iloc[-5])):
-            result["long"] = "SELL"
+        if ((data["macd_lower"].iloc[-1] < data["macd_lower"].iloc[-3]) and
+                (data["macd_lower"].iloc[-2] < data["macd_lower"].iloc[-4]) and
+                (data["macd_lower"].iloc[-3] < data["macd_lower"].iloc[-5])):
+            result["lower"] = "SELL"
 
-        if result["short"] == "BUY" and result["middle"] == "BUY" and result ["long"] == "BUY":
+        if result["upper"] == "BUY" and result["middle"] == "BUY" and result ["lower"] == "BUY":
             return "BUY"
-        elif result["short"] == "SELL" and result["middle"] == "SELL" and result ["long"] == "SELL":
+        elif result["upper"] == "SELL" and result["middle"] == "SELL" and result ["lower"] == "SELL":
             return "SELL"
         else :
             return "None"
+
+    def can_buy(self, stage):
+        if stage == 1:
+            pass
+
 

@@ -1,4 +1,3 @@
-import os.path
 import time
 from multiprocessing.dummy import Pool as ThreadPool
 
@@ -8,7 +7,7 @@ from factory import Factory
 from logger import get_logger
 
 
-def main(ticker):
+def main(ticker: str):
 
     log = get_logger(ticker)
 
@@ -16,9 +15,6 @@ def main(ticker):
     trading_service = container["tradingService"]
     crypto_service = container["cryptoService"]
     llm_service = container["llmService"]
-
-    if not os.path.exists(f"{os.getcwd()}/data/{ticker}"):
-        os.mkdir(f"{os.getcwd()}/data/{ticker}/")
 
     trading_service.init()
 
@@ -30,6 +26,7 @@ def main(ticker):
             "short":10,
             "middle":20,
             "long":60,
+            "signal":1,
         })
         get_stage = trading_service.get_stage(data)
 
@@ -54,24 +51,20 @@ def main(ticker):
                 })
                 if trade["result"] == "BUY" and crypto_service.get_my_crypto() == 0:
                     log.debug("buying........")
-                    trading_service.BUY({
-                        "price": 6000,
-                    })
+                    trading_service.BUY(6000)
             elif buy_or_sell == "SELL":
                 trade = llm_service.trading({
                     "data":df,
                 })
                 if trade["result"] == "SELL" and trading_service.get_profit() > 0.8 :
                     log.debug("selling......")
-                    trading_service.SELL({
-                        "amount": crypto_service.get_my_crypto()
-                    })
+                    trading_service.SELL()
         time.sleep(60)
 
 
 if __name__ == '__main__':
 
-    tickers = ["BTC","ETH","BCH"]
+    tickers = ["BTC","ETH","BCH","SOL"]
 
     pool = ThreadPool(len(tickers))
     result = pool.map(main, tickers)

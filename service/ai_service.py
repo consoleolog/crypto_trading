@@ -1,5 +1,7 @@
 import json
 
+from pandas import DataFrame
+
 from config import OPENAI_API_KEY
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -11,28 +13,27 @@ from logger import get_logger
 
 
 class JsonOutputParser(BaseOutputParser):
-    def parse(self, text):
+    def parse(self, text: str):
         text = text.replace("```", "").replace("json", "")
         return json.loads(text)
 
 class LLmService:
-    def __init__(self, ticker):
+    def __init__(self, ticker: str):
         self.output_parser = JsonOutputParser()
         self.TICKER = ticker
-        self.log = get_logger(self.TICKER)
+        self.log = get_logger(ticker)
 
         self.model = ChatOpenAI(
             openai_api_key=OPENAI_API_KEY,
             model='gpt-4o-mini'
         )
 
-    def trading(self, inputs):
+    def trading(self, inputs:dict[str, DataFrame])->dict[str, str]:
 
         data = inputs["data"]
         data.drop(["close",
                    "ema_short","ema_middle","ema_long",
-                   "macd_short_slope","macd_middle_slope","macd_long_slope"
-                   ], axis=1, inplace=True)
+                   "macd_short_slope","macd_middle_slope","macd_long_slope"], axis=1, inplace=True)
         data.dropna(inplace=True)
 
         template = ChatPromptTemplate.from_messages([

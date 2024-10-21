@@ -11,12 +11,12 @@ from logger import get_logger
 
 
 class MailService:
-    def __init__(self, ticker):
+    def __init__(self, ticker:str):
         self.root_dir = os.getcwd()
         self.TICKER = ticker
-        self.log = get_logger(self.TICKER)
+        self.log = get_logger(ticker)
 
-    def send_file(self, inputs):
+    def send_file(self, inputs:dict[str, str])->type(None):
         self.log.debug(f"sending {self.TICKER} mail....")
         msg = MIMEMultipart('alternative')
         msg['Subject'] = f"[{self.TICKER}] {inputs['content']}"
@@ -24,9 +24,9 @@ class MailService:
         msg['To'] = SMTP_TO
         part = MIMEText(f"<h4>{inputs['content']}</h4>", 'html')
         msg.attach(part)
-        with open(f"{self.root_dir}/data/{self.TICKER}/{inputs['filename']}", 'rb') as f:
+        with open(f"{self.root_dir}/data/{self.TICKER}/{inputs['filename']}", 'rb') as handler:
             file = MIMEBase("application", "octet-stream")
-            file.set_payload(f.read())
+            file.set_payload(handler.read())
             encoders.encode_base64(file)
             file.add_header("Content-Disposition", f"attachment; filename={inputs['filename']}")
             msg.attach(file)
