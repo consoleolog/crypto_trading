@@ -17,7 +17,6 @@ class MailService:
         self.log = get_logger(ticker)
 
     def send_file(self, inputs:dict[str, str])->type(None):
-        self.log.debug(f"sending {self.TICKER} mail....")
         msg = MIMEMultipart('alternative')
         msg['Subject'] = f"[{self.TICKER}] {inputs['content']}"
         msg['From'] = SMTP_FROM

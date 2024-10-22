@@ -41,22 +41,22 @@ class TradingService:
         result = {}
 
         # 단기 > 중기 > 장기
-        if data["ema_short"].iloc[-1] > data["ema_middle"].iloc[-1] > data["ema_long"].iloc[-1]:
+        if data["ema_short"].iloc[-1] >= data["ema_middle"].iloc[-1] >= data["ema_long"].iloc[-1]:
             result["stage"] = 1
         # 중기 > 단기 > 장기
-        elif data["ema_middle"].iloc[-1] > data["ema_short"].iloc[-1] > data["ema_long"].iloc[-1]:
+        elif data["ema_middle"].iloc[-1] >= data["ema_short"].iloc[-1] >= data["ema_long"].iloc[-1]:
             result["stage"] = 2
         # 중기 > 장기 > 단기
-        elif data["ema_middle"].iloc[-1] > data["ema_long"].iloc[-1] > data["ema_short"].iloc[-1]:
+        elif data["ema_middle"].iloc[-1] >= data["ema_long"].iloc[-1] >= data["ema_short"].iloc[-1]:
             result["stage"] = 3
         # 장기 > 중기 > 단기
-        elif data["ema_long"].iloc[-1] > data["ema_middle"].iloc[-1] > data["ema_short"].iloc[-1]:
+        elif data["ema_long"].iloc[-1] >= data["ema_middle"].iloc[-1] >= data["ema_short"].iloc[-1]:
             result["stage"] = 4
         # 장기 > 단기 > 중기
-        elif data["ema_long"].iloc[-1] > data["ema_short"].iloc[-1] > data["ema_middle"].iloc[-1]:
+        elif data["ema_long"].iloc[-1] >= data["ema_short"].iloc[-1] >= data["ema_middle"].iloc[-1]:
             result["stage"] = 5
         # 단기 > 장기 > 중기
-        elif data["ema_short"].iloc[-1] > data["ema_long"].iloc[-1] > data["ema_middle"].iloc[-1]:
+        elif data["ema_short"].iloc[-1] >= data["ema_long"].iloc[-1] >= data["ema_middle"].iloc[-1]:
             result["stage"] = 6
         else:
             raise Exception("NOT_FOUND_STAGE")
@@ -65,24 +65,24 @@ class TradingService:
         return result["stage"]
 
     def BUY(self, price: int) -> type(None):
-        if self.cryptoService.get_my_crypto() == 0:
+        try:
             msg = self.UPBIT.buy_market_order(f"KRW-{self.TICKER}", price)
             if isinstance(msg, dict):
                 msg['market_price'] = pyupbit.get_current_price(f"KRW-{self.TICKER}")
-
+                self.log.debug(f"sending {self.TICKER} mail :: buy result ....")
                 self.tradingRepository.save(Trade(msg), "BUY")
-                self.mailService.send_file({
-                    "content":f"{self.TICKER} 매수 결과 보고",
-                    "filename":"buy.csv"
-                })
                 self.mailService.send_file({
                     "content":f"{self.TICKER} 매수 결과 보고",
                     "filename":"buy_sell.csv"
                 })
+        except Exception as e:
+            self.log.error(e)
+            pass
 
     def SELL(self) -> type(None):
         msg = self.UPBIT.sell_market_order(f"KRW-{self.TICKER}", self.cryptoService.get_my_crypto())
         if isinstance(msg, dict):
+            self.log.debug(f"sending {self.TICKER} mail :: sell result ....")
             msg['market_price'] = pyupbit.get_current_price(f"KRW-{self.TICKER}")
             msg['locked'] = 0
             self.tradingRepository.save(Trade(msg), "SELL")
@@ -105,20 +105,20 @@ class TradingService:
         return len(self.cryptoRepository.get_history()) > 5
 
     def get_profit(self) -> float:
-        data = self.tradingRepository.get_trade_history()
-        return (pyupbit.get_current_price(f"KRW-{self.TICKER}") - data["market_price"]) /data["market_price"] * 100
+        price = self.tradingRepository.get_my_price()
+        return (pyupbit.get_current_price(f"KRW-{self.TICKER}") - price) / price * 100
 
     def compare_for_buy(self, key: str, n: int) -> bool:
         data = self.cryptoRepository.get_history()
         for i in range(0, n):
-            if not (data[key].iloc[-(i + 1)] > data[key].iloc[-(i + 2)]):
+            if not (data[key].iloc[-(i + 1)] >= data[key].iloc[-(i + 2)]):
                 return False
         return True
 
     def compare_for_sell(self, key: str, n: int) -> bool:
         data = self.cryptoRepository.get_history()
         for i in range(0, n):
-            if not (data[key].iloc[-(i + 1)] < data[key].iloc[-(i + 2)]):
+            if not (data[key].iloc[-(i + 1)] <= data[key].iloc[-(i + 2)]):
                 return False
         return True
 
@@ -131,9 +131,9 @@ class TradingService:
             return True
 
     def for_sell(self, stage:int) -> bool:
-        if stage == 1 and (self.compare_for_sell("macd_upper", 4) and self.compare_for_sell("macd_middle", 4) and self.compare_for_sell("macd_lower", 4)):
+        if stage == 1 and (self.compare_for_sell("macd_upper", 4) and self.compare_for_sell("macd_middle", 4) and self.compare_for_sell("macd_lower", 3)):
             return True
-        if stage == 2 and (self.compare_for_sell("macd_upper", 4) and self.compare_for_sell("macd_middle",4) and self.compare_for_sell("macd_lower", 3)):
+        if stage == 2 and (self.compare_for_sell("macd_upper", 4) and self.compare_for_sell("macd_middle",3) and self.compare_for_sell("macd_lower", 3)):
             return True
-        if stage == 3 and self.compare_for_sell("macd_upper",4) and self.compare_for_sell("macd_middle", 3) and self.compare_for_sell("macd_lower", 3):
+        if stage == 3 and self.compare_for_sell("macd_upper",3) and self.compare_for_sell("macd_middle", 3) and self.compare_for_sell("macd_lower", 3):
             return True

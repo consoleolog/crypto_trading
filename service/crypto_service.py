@@ -1,7 +1,7 @@
 from typing import Union
 
 import pyupbit
-from pandas import DataFrame
+
 from pyupbit import Upbit
 
 from config import UPBIT_ACCESS_KEY, UPBIT_SECRET_KEY
@@ -16,6 +16,16 @@ class CryptoService:
         balances = self.UPBIT.get_balances()
         for b in balances:
             if b['currency'] == self.TICKER:
+                if b['balance'] is not None:
+                    return float(b['balance'])
+                else:
+                    return 0
+        return 0
+
+    def get_amount(self, ticker:str)-> Union[int, float]:
+        balances = self.UPBIT.get_balances()
+        for b in balances:
+            if b['currency'] == ticker:
                 if b['balance'] is not None:
                     return float(b['balance'])
                 else:

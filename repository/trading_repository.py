@@ -2,7 +2,6 @@ import os
 from datetime import datetime
 
 import pandas as pd
-from pandas import DataFrame
 
 from logger import get_logger
 from model.trade import Trade
@@ -14,9 +13,15 @@ class TradingRepository:
         self.TICKER = ticker
         self.log = get_logger(self.TICKER)
 
-    def get_trade_history(self)->DataFrame:
-        data = pd.read_csv(f"{self.data_dir}/{self.TICKER}/buy.csv", encoding="utf-8")
-        return data.iloc[-1]
+    def get_my_price(self) -> int:
+        df = pd.read_csv(f"{self.data_dir}/{self.TICKER}/buy_sell.csv", encoding="utf-8")
+        price = 0
+        for i, data in df.iloc[::-1].iterrows():
+            if data["buy/sell"] == "SELL":
+                return price
+            elif data["buy/sell"] == "BUY":
+                price += data["my_price"]
+        return price
 
     def create_file(self)->type(None):
         if not os.path.exists(f"{self.data_dir}/{self.TICKER}/buy.csv"):
