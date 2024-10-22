@@ -10,12 +10,15 @@ def main(ticker: str):
 
     while True:
         try:
-            app.trade_util.response_stage(app.crypto_util.ema("minute1", 120, {
-                "short": 10,
-                "middle": 20,
-                "long": 40,
-                "signal": 9,
-            }))
+            app.trade_util.response_stage(
+                app.trade_util.get_stage(
+                    app.crypto_util.ema("minute1", 120, {
+                        "short": 10,
+                        "middle": 20,
+                        "long": 40,
+                        "signal": 9,
+                    })
+            ))
             time.sleep(60)
         except Exception as err:
             raise Exception(err)
