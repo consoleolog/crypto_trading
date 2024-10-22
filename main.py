@@ -14,7 +14,7 @@ def main(ticker: str):
                 "short": 10,
                 "middle": 20,
                 "long": 40,
-                "signal": 1,
+                "signal": 9,
             }))
             time.sleep(60)
         except Exception as err:

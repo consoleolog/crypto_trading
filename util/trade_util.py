@@ -57,7 +57,7 @@ class TradeUtil:
             if msg["result"]:
                 self.buy(msg["price"])
         # 매도 검토
-        elif (stage == 1 or stage == 2 or stage == 3) and self.can_sell() == True:
+        if self.can_sell():
             self.sell()
 
     def buy(self, price: int) -> type(None):
@@ -121,18 +121,18 @@ class TradeUtil:
                     (self.compare_for_buy("macd_lower", 4, 2) or self.compare_for_buy("macd_lower", 4, 3))):
                 data["price"] = 6000
                 data["result"] = True
-            elif (stage == 5 and self.crypto_util.get_amount("KRW") > 7003 and len(
+            elif (stage == 5 and self.crypto_util.get_amount("KRW") > 7004 and len(
                     self.crypto_util.get_history()) > 5 and
-                  (self.compare_for_buy("macd_upper", 5, 2) or self.compare_for_buy("macd_upper", 5, 3)) and
+                  (self.compare_for_buy("macd_upper", 5, 2) or self.compare_for_buy("macd_upper", 4, 3)) and
                   (self.compare_for_buy("macd_middle", 4, 2) or self.compare_for_buy("macd_middle", 4, 3)) and
                   (self.compare_for_buy("macd_lower", 4, 2) or self.compare_for_buy("macd_lower", 4, 3))):
                 data["price"] = 7000
                 data["result"] = True
-            elif (stage == 6 and self.crypto_util.get_amount("KRW") > 8003 and len(
+            elif (stage == 6 and self.crypto_util.get_amount("KRW") > 8004 and len(
                     self.crypto_util.get_history()) > 5 and
                   (self.compare_for_buy("macd_upper", 5, 2) or self.compare_for_buy("macd_upper", 5, 3)) and
-                  (self.compare_for_buy("macd_middle", 5, 2) or self.compare_for_buy("macd_middle", 5, 3)) and
-                  (self.compare_for_buy("macd_lower", 5, 2) or self.compare_for_buy("macd_lower", 5, 3))):
+                  (self.compare_for_buy("macd_middle", 4, 2) or self.compare_for_buy("macd_middle", 4, 3)) and
+                  (self.compare_for_buy("macd_lower", 4, 2) or self.compare_for_buy("macd_lower", 4, 3))):
                 data["price"] = 8000
                 data["result"] = True
             else:
@@ -146,13 +146,9 @@ class TradeUtil:
         try:
             if self.crypto_util.get_my_price() == 0 or self.crypto_util.get_my_price() is None:
                 return False
-            profit = (pyupbit.get_current_price(
-            f"KRW-{self.ticker}") - self.crypto_util.get_my_price()) / self.crypto_util.get_my_price() * 100
-            if (self.crypto_util.get_amount(self.ticker) != 0 and len(
-                    self.crypto_util.get_history()) > 5 and profit > 0.8 and
-                    (self.compare_for_sell("macd_upper", 4, 2) or self.compare_for_sell("macd_upper", 4, 3)) and
-                    (self.compare_for_sell("macd_middle", 4, 2) or self.compare_for_sell("macd_middle", 4, 3)) and
-                    (self.compare_for_sell("macd_lower", 3, 2) or self.compare_for_sell("macd_lower", 3, 3))):
+            profit = (pyupbit.get_current_price(f"KRW-{self.ticker}") - self.crypto_util.get_my_price()) / self.crypto_util.get_my_price() * 100
+            if (self.crypto_util.get_amount(self.ticker) != 0 and len(self.crypto_util.get_history()) > 5 and profit > 0.8 and
+                (self.compare_for_sell("macd_upper", 5, 2) or self.compare_for_sell("macd_upper", 4, 3))):
                 return True
             else:
                 return False
@@ -174,6 +170,4 @@ class TradeUtil:
                 handler.write(f",{trade.market_price}")
         except Exception as err:
             self.log.error(err)
-
-
 
