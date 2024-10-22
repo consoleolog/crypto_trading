@@ -44,7 +44,7 @@ class TradeUtil:
             elif crypto.ema_long >= crypto.ema_short >= crypto.ema_middle:
                 result["stage"] = 5
             # 단기 > 장기 > 중기
-            elif crypto.ema_short >= crypto.ema_long.iloc[-1] >= crypto.ema_middle:
+            elif crypto.ema_short >= crypto.ema_long >= crypto.ema_middle:
                 result["stage"] = 6
 
             self.crypto_util.save_data(crypto, result["stage"])
@@ -54,18 +54,13 @@ class TradeUtil:
 
     def response_stage(self, stage:int)-> None:
         # 매수 검토
-        if stage == 4 or stage == 5 or stage == 6:
+        if (stage == 4 or stage == 5 or stage == 6) and self.crypto_util.get_amount(self.ticker) == 0:
             msg = self.can_buy(stage)
             if msg["result"]:
                 self.buy(msg["price"])
         # 매도 검토
-        if self.crypto_util.get_my_price() != 0 and self.crypto_util.get_my_price() is not None:
-            profit = (pyupbit.get_current_price(
-                f"KRW-{self.ticker}") - self.crypto_util.get_my_price()) / self.crypto_util.get_my_price() * 100
-            if (self.crypto_util.get_amount(self.ticker) != 0 and len(
-                    self.crypto_util.get_history()) > 5 and profit > 0.8 and
-                    (self.compare_for_sell("macd_upper", 4, 2) or self.compare_for_sell("macd_upper", 4, 3))):
-                self.sell()
+        elif (stage == 1 or stage == 2 or stage == 3) and self.crypto_util.get_amount(self.ticker) != 0 and self.can_sell(stage) == True:
+            self.sell()
 
     def buy(self, price: int) -> None:
         try:
@@ -100,7 +95,7 @@ class TradeUtil:
         try:
             data = self.crypto_util.get_history()
             for i in range(0, n):
-                if not (data[key].iloc[-(i + 1)] >= data[key].iloc[-(i + index)]):
+                if not (data[key].iloc[-(i + 1)] > data[key].iloc[-(i + index)]):
                     return False
             return True
         except Exception as err:
@@ -111,7 +106,7 @@ class TradeUtil:
         try:
             data = self.crypto_util.get_history()
             for i in range(0, n):
-                if not (data[key].iloc[-(i + 1)] <= data[key].iloc[-(i + index)]):
+                if not (data[key].iloc[-(i + 1)] < data[key].iloc[-(i + index)]):
                     return False
             return True
         except Exception as err:
@@ -148,6 +143,32 @@ class TradeUtil:
             self.log.error(err)
             data["result"] = False
         return data
+
+    def can_sell(self, stage: int):
+        profit = (pyupbit.get_current_price(
+            f"KRW-{self.ticker}") - self.crypto_util.get_my_price()) / self.crypto_util.get_my_price() * 100
+
+        try :
+            if (stage == 1  and len( self.crypto_util.get_history()) > 5 and profit > 0.8 and
+                    (self.compare_for_sell("macd_upper", 3, 2) or self.compare_for_sell("macd_upper", 3, 3)) and
+                    (self.compare_for_sell("macd_middle", 3, 2) or self.compare_for_sell("macd_middle", 2, 3)) and
+                    (self.compare_for_sell("macd_lower", 3, 2) or self.compare_for_sell("macd_lower", 2, 3))):
+                    return True
+            elif (stage == 2 and len(self.crypto_util.get_history()) > 5 and profit > 0.8 and
+                  (self.compare_for_sell("macd_upper", 4, 2) or self.compare_for_sell("macd_upper", 3, 3)) and
+                  (self.compare_for_sell("macd_middle", 3, 2) or self.compare_for_sell("macd_middle", 3, 3)) and
+                  (self.compare_for_sell("macd_lower", 3, 2) or self.compare_for_sell("macd_lower", 2, 3))):
+                   return True
+            elif (stage == 3  and len(self.crypto_util.get_history()) > 5 and profit > 0.8 and
+                  (self.compare_for_sell("macd_upper", 4, 2) or self.compare_for_sell("macd_upper", 4, 3)) and
+                  (self.compare_for_sell("macd_middle", 3, 2) or self.compare_for_sell("macd_middle", 3, 3)) and
+                  (self.compare_for_sell("macd_lower", 3, 2) or self.compare_for_sell("macd_lower", 3, 3))):
+                  return True
+            else:
+                return False
+        except Exception as err:
+            self.log.error(err)
+            return False
 
     def save_result(self, trade: Trade, code: str)->None:
         try:

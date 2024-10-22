@@ -16,9 +16,6 @@ class CommonUtil:
 
     def init(self) -> None:
         try:
-            if not os.path.exists(f"{os.getcwd()}/data"):
-                os.mkdir(f"{os.getcwd()}/data")
-
             if not os.path.exists(f"{os.getcwd()}/data/{self.ticker}"):
                 os.mkdir(f"{os.getcwd()}/data/{self.ticker}")
 
