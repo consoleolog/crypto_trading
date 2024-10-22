@@ -151,16 +151,16 @@ class TradeUtil:
         try :
             if (stage == 1  and len( self.crypto_util.get_history()) > 5 and profit > 0.8 and
                     (self.compare_for_sell("macd_upper", 3, 2) or self.compare_for_sell("macd_upper", 3, 3)) and
-                    (self.compare_for_sell("macd_middle", 3, 2) or self.compare_for_sell("macd_middle", 2, 3)) and
-                    (self.compare_for_sell("macd_lower", 3, 2) or self.compare_for_sell("macd_lower", 2, 3))):
+                    (self.compare_for_sell("macd_middle", 2, 2) or self.compare_for_sell("macd_middle", 2, 3)) and
+                    (self.compare_for_sell("macd_lower", 2, 2) or self.compare_for_sell("macd_lower", 2, 3))):
                     return True
             elif (stage == 2 and len(self.crypto_util.get_history()) > 5 and profit > 0.8 and
-                  (self.compare_for_sell("macd_upper", 4, 2) or self.compare_for_sell("macd_upper", 3, 3)) and
+                  (self.compare_for_sell("macd_upper", 3, 2) or self.compare_for_sell("macd_upper", 3, 3)) and
                   (self.compare_for_sell("macd_middle", 3, 2) or self.compare_for_sell("macd_middle", 3, 3)) and
                   (self.compare_for_sell("macd_lower", 3, 2) or self.compare_for_sell("macd_lower", 2, 3))):
                    return True
             elif (stage == 3  and len(self.crypto_util.get_history()) > 5 and profit > 0.8 and
-                  (self.compare_for_sell("macd_upper", 4, 2) or self.compare_for_sell("macd_upper", 4, 3)) and
+                  (self.compare_for_sell("macd_upper", 3, 2) or self.compare_for_sell("macd_upper", 3, 3)) and
                   (self.compare_for_sell("macd_middle", 3, 2) or self.compare_for_sell("macd_middle", 3, 3)) and
                   (self.compare_for_sell("macd_lower", 3, 2) or self.compare_for_sell("macd_lower", 3, 3))):
                   return True
