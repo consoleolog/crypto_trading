@@ -104,6 +104,7 @@ class TradingService:
             if not os.path.exists(f"{os.getcwd()}/data/{self.TICKER}"):
                 os.mkdir(f"{os.getcwd()}/data/{self.TICKER}")
 
+            self.log.debug(f"create {self.TICKER} csv files.....")
             self.tradingRepository.create_file()
         except Exception as err:
             raise Exception(err)
@@ -163,8 +164,10 @@ class TradingService:
 
     def can_sell(self):
         try:
+            if self.tradingRepository.get_my_price() == 0:
+                return False
             profit = (pyupbit.get_current_price(
-                f"KRW-{self.TICKER}") - self.tradingRepository.get_my_price()) / self.tradingRepository.get_my_price() * 100
+            f"KRW-{self.TICKER}") - self.tradingRepository.get_my_price()) / self.tradingRepository.get_my_price() * 100
             if (self.cryptoService.get_amount(self.TICKER) != 0 and len(
                     self.cryptoRepository.get_history()) > 5 and profit > 0.8 and
                     (self.compare_for_sell("macd_upper", 4, 2) or self.compare_for_sell("macd_upper", 4, 3)) and
@@ -176,5 +179,6 @@ class TradingService:
         except Exception as err:
             self.log.error(err)
             return False
+
 
 
