@@ -1,3 +1,4 @@
+import os
 import time
 from multiprocessing.dummy import Pool as ThreadPool
 
@@ -5,6 +6,9 @@ from trading_application import TradingApplication
 
 def main(ticker: str):
     app = TradingApplication(ticker)
+
+    if not os.path.exists(f"{os.getcwd()}/data"):
+        os.mkdir(f"{os.getcwd()}/data")
 
     app.common_util.init()
 
@@ -25,8 +29,8 @@ def main(ticker: str):
 
 if __name__ == '__main__':
 
-    tickers: list[str] = ["BTC","BCH","SOL","AAVE"]
-    # tickers: list[str] = ["XRP","DOGE","SHIB","BSV","ETH"]
+    tickers: list[str] = ["XRP","DOGE","BSV","ETH","SOL","AAVE","UNI"]
+    # tickers: list[str] = ["XRP","DOGE","SHIB","BSV","ETH","BTC","BCH"]
 
     pool = ThreadPool(len(tickers))
     result = pool.map(main, tickers)
