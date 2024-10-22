@@ -1,12 +1,80 @@
 import os
+import smtplib
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
-import pandas as pd
+from config import SMTP_FROM, SMTP_TO, NAVER_PASSWORD, NAVER_ID
+from logger import get_logger
 
+class CommonUtil:
+    def __init__(self, ticker:str):
+        self.data_dir = f'{os.getcwd()}/data'
+        self.ticker = ticker
+        self.log = get_logger(ticker)
 
-def refresh_file(inputs):
-    os.remove(inputs['log_file'])
-    for f in os.listdir(inputs['data_dir']):
-        if f.endswith('.csv'):
-            fp = os.path.join(inputs['data_dir'], f)
-            ed = pd.DataFrame(columns=pd.read_csv(fp).columns)
-            ed.to_csv(fp, index=False)
+    def init(self) -> type(None):
+        try:
+            if not os.path.exists(f"{os.getcwd()}/data"):
+                os.mkdir(f"{os.getcwd()}/data")
+
+            if not os.path.exists(f"{os.getcwd()}/data/{self.ticker}"):
+                os.mkdir(f"{os.getcwd()}/data/{self.ticker}")
+
+            if not os.path.exists(f"{self.data_dir}/{self.ticker}/buy_sell.csv"):
+                with open(f"{self.data_dir}/{self.ticker}/buy_sell.csv", "w", encoding="utf-8") as handler:
+                    handler.write("date")
+                    handler.write(",ticker")
+                    handler.write(",buy/sell")
+                    handler.write(",my_price")
+                    handler.write(",market_price")
+
+            if not os.path.exists(f"{self.data_dir}/{self.ticker}/data.csv"):
+                with open(f"{self.data_dir}/{self.ticker}/data.csv", "w", encoding="utf-8") as handler:
+                    handler.write("date")
+                    handler.write(",close")
+                    handler.write(",stage")
+                    handler.write(",ema_short")
+                    handler.write(",ema_middle")
+                    handler.write(",ema_long")
+                    handler.write(",signal")
+                    handler.write(",histogram_upper")
+                    handler.write(",histogram_middle")
+                    handler.write(",histogram_lower")
+                    handler.write(",macd_upper")
+                    handler.write(",macd_middle")
+                    handler.write(",macd_lower")
+                    handler.write(",close_slope")
+                    handler.write(",ema_short_slope")
+                    handler.write(",ema_middle_slope")
+                    handler.write(",ema_long_slope")
+                    handler.write(",signal_slope")
+                    handler.write(",macd_upper_slope")
+                    handler.write(",macd_middle_slope")
+                    handler.write(",macd_lower_slope")
+        except Exception as err:
+            self.log.error(err)
+
+    def send_mail(self, inputs:dict[str, str]):
+        try:
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = f"[{self.ticker}] {inputs['content']}"
+            msg['From'] = SMTP_FROM
+            msg['To'] = SMTP_TO
+            part = MIMEText(f"<h4>{inputs['content']}</h4>", 'html')
+            msg.attach(part)
+            with open(f"{self.data_dir}/{self.ticker}/{inputs['filename']}", 'rb') as handler:
+                file = MIMEBase("application", "octet-stream")
+                file.set_payload(handler.read())
+                encoders.encode_base64(file)
+                file.add_header("Content-Disposition", f"attachment; filename={inputs['filename']}")
+                msg.attach(file)
+            s = smtplib.SMTP('smtp.naver.com', 587)
+            s.starttls()
+            s.login(NAVER_ID, NAVER_PASSWORD)
+            s.sendmail(SMTP_FROM, SMTP_TO, msg.as_string())
+            s.close()
+        except Exception as err:
+            self.log.error(err)
+
