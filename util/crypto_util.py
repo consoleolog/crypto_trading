@@ -78,7 +78,7 @@ class CryptoUtil:
             self.log.error(err)
 
 
-    def get_history(self)->DataFrame:
+    def get_history(self)-> DataFrame:
         try:
             return pd.read_csv(f"{self.data_dir}/{self.ticker}/data.csv", encoding='utf-8')
         except Exception as err:
@@ -101,7 +101,7 @@ class CryptoUtil:
             return 0
 
 
-    def save_data(self, crypto: Crypto, stage: int):
+    def save_data(self, crypto: Crypto, stage: int)->None:
         try:
             with open(f'{self.data_dir}/{self.ticker}/data.csv', 'a', encoding='utf-8') as handler:
                 handler.write(f"\n{crypto.date}")

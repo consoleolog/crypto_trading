@@ -14,7 +14,7 @@ class CommonUtil:
         self.ticker = ticker
         self.log = get_logger(ticker)
 
-    def init(self) -> type(None):
+    def init(self) -> None:
         try:
             if not os.path.exists(f"{os.getcwd()}/data"):
                 os.mkdir(f"{os.getcwd()}/data")
@@ -56,7 +56,7 @@ class CommonUtil:
         except Exception as err:
             self.log.error(err)
 
-    def send_mail(self, inputs:dict[str, str]):
+    def send_mail(self, inputs:dict[str, str])->None:
         try:
             msg = MIMEMultipart('alternative')
             msg['Subject'] = f"[{self.ticker}] {inputs['content']}"

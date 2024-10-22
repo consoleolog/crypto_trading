@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import Union, Any
 
 import pyupbit
 from pyupbit import Upbit
@@ -51,16 +52,22 @@ class TradeUtil:
         except Exception as err:
             self.log.error(err)
 
-    def response_stage(self, stage:int):
+    def response_stage(self, stage:int)-> None:
+        # 매수 검토
         if stage == 4 or stage == 5 or stage == 6:
             msg = self.can_buy(stage)
             if msg["result"]:
                 self.buy(msg["price"])
         # 매도 검토
-        if self.can_sell():
-            self.sell()
+        if self.crypto_util.get_my_price() != 0 and self.crypto_util.get_my_price() is not None:
+            profit = (pyupbit.get_current_price(
+                f"KRW-{self.ticker}") - self.crypto_util.get_my_price()) / self.crypto_util.get_my_price() * 100
+            if (self.crypto_util.get_amount(self.ticker) != 0 and len(
+                    self.crypto_util.get_history()) > 5 and profit > 0.8 and
+                    (self.compare_for_sell("macd_upper", 4, 2) or self.compare_for_sell("macd_upper", 4, 3))):
+                self.sell()
 
-    def buy(self, price: int) -> type(None):
+    def buy(self, price: int) -> None:
         try:
             msg = self.upbit.buy_market_order(f"KRW-{self.ticker}", price)
             if isinstance(msg, dict):
@@ -74,7 +81,7 @@ class TradeUtil:
         except Exception as e:
             self.log.error(e)
 
-    def sell(self) -> type(None):
+    def sell(self) -> None:
         try:
             msg = self.upbit.sell_market_order(f"KRW-{self.ticker}", self.crypto_util.get_amount(self.ticker))
             if isinstance(msg, dict):
@@ -111,7 +118,7 @@ class TradeUtil:
             self.log.error(err)
             return False
 
-    def can_buy(self, stage: int):
+    def can_buy(self, stage: int)->dict[str, Any]:
         data = {}
         try :
             if (stage == 4 and self.crypto_util.get_amount("KRW") > 6003 and len(
@@ -142,21 +149,7 @@ class TradeUtil:
             data["result"] = False
         return data
 
-    def can_sell(self):
-        try:
-            if self.crypto_util.get_my_price() == 0 or self.crypto_util.get_my_price() is None:
-                return False
-            profit = (pyupbit.get_current_price(f"KRW-{self.ticker}") - self.crypto_util.get_my_price()) / self.crypto_util.get_my_price() * 100
-            if (self.crypto_util.get_amount(self.ticker) != 0 and len(self.crypto_util.get_history()) > 5 and profit > 0.8 and
-                (self.compare_for_sell("macd_upper", 5, 2) or self.compare_for_sell("macd_upper", 4, 3))):
-                return True
-            else:
-                return False
-        except Exception as err:
-            self.log.error(err)
-            return False
-
-    def save_result(self, trade: Trade, code: str)->type(None):
+    def save_result(self, trade: Trade, code: str)->None:
         try:
             datefmt = '%Y-%m-%d %H:%M:%S'
             dt = datetime.fromisoformat(trade.create_time)
