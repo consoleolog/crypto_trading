@@ -138,21 +138,21 @@ class TradingService:
                     self.cryptoRepository.get_history()) > 5 and
                     (self.compare_for_buy("macd_upper", 4, 2) or self.compare_for_buy("macd_upper", 4, 3)) and
                     (self.compare_for_buy("macd_middle", 4, 2) or self.compare_for_buy("macd_middle", 4, 3)) and
-                    (self.compare_for_buy("macd_long", 4, 2) or self.compare_for_buy("macd_long", 4, 3))):
+                    (self.compare_for_buy("macd_lower", 4, 2) or self.compare_for_buy("macd_lower", 4, 3))):
                 data["price"] = 6000
                 data["result"] = True
             elif (stage == 5 and self.cryptoService.get_amount("KRW") > 7003 and len(
                     self.cryptoRepository.get_history()) > 5 and
                   (self.compare_for_buy("macd_upper", 5, 2) or self.compare_for_buy("macd_upper", 5, 3)) and
                   (self.compare_for_buy("macd_middle", 4, 2) or self.compare_for_buy("macd_middle", 4, 3)) and
-                  (self.compare_for_buy("macd_long", 4, 2) or self.compare_for_buy("macd_long", 4, 3))):
+                  (self.compare_for_buy("macd_lower", 4, 2) or self.compare_for_buy("macd_lower", 4, 3))):
                 data["price"] = 7000
                 data["result"] = True
             elif (stage == 6 and self.cryptoService.get_amount("KRW") > 8003 and len(
                     self.cryptoRepository.get_history()) > 5 and
                   (self.compare_for_buy("macd_upper", 5, 2) or self.compare_for_buy("macd_upper", 5, 3)) and
                   (self.compare_for_buy("macd_middle", 5, 2) or self.compare_for_buy("macd_middle", 5, 3)) and
-                  (self.compare_for_buy("macd_long", 5, 2) or self.compare_for_buy("macd_long", 5, 3))):
+                  (self.compare_for_buy("macd_lower", 5, 2) or self.compare_for_buy("macd_lower", 5, 3))):
                 data["price"] = 8000
                 data["result"] = True
             else:
@@ -164,7 +164,7 @@ class TradingService:
 
     def can_sell(self):
         try:
-            if self.tradingRepository.get_my_price() == 0:
+            if self.tradingRepository.get_my_price() == 0 or self.tradingRepository.get_my_price() is None:
                 return False
             profit = (pyupbit.get_current_price(
             f"KRW-{self.TICKER}") - self.tradingRepository.get_my_price()) / self.tradingRepository.get_my_price() * 100
@@ -172,7 +172,7 @@ class TradingService:
                     self.cryptoRepository.get_history()) > 5 and profit > 0.8 and
                     (self.compare_for_sell("macd_upper", 4, 2) or self.compare_for_sell("macd_upper", 4, 3)) and
                     (self.compare_for_sell("macd_middle", 4, 2) or self.compare_for_sell("macd_middle", 4, 3)) and
-                    (self.compare_for_sell("macd_long", 3, 2) or self.compare_for_sell("macd_long", 3, 3))):
+                    (self.compare_for_sell("macd_lower", 3, 2) or self.compare_for_sell("macd_lower", 3, 3))):
                 return True
             else:
                 return False

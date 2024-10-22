@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import Union
 
 import pandas as pd
 
@@ -13,29 +14,24 @@ class TradingRepository:
         self.TICKER = ticker
         self.log = get_logger(ticker)
 
-    def get_my_price(self) -> int:
+    def get_my_price(self) -> Union[int, float]:
         price = 0
+        count = 0
         try:
             df = pd.read_csv(f"{self.data_dir}/{self.TICKER}/buy_sell.csv", encoding="utf-8")
             for i, data in df.iloc[::-1].iterrows():
                 if data["buy/sell"] == "SELL":
                     return price
                 elif data["buy/sell"] == "BUY":
-                    price += data["my_price"]
+                    price += data["market_price"]
+                    count += 1
+                return price / count
         except Exception as err:
             self.log.error(err)
-        return price
+            return 0
 
     def create_file(self)->type(None):
         try:
-            if not os.path.exists(f"{self.data_dir}/{self.TICKER}/buy.csv"):
-                self.log.debug(f"create {self.TICKER} csv files.....")
-                with open(f"{self.data_dir}/{self.TICKER}/buy.csv", "w", encoding="utf-8") as handler:
-                    handler.write("date")
-                    handler.write(",ticker")
-                    handler.write(",my_price")
-                    handler.write(",market_price")
-
             if not os.path.exists(f"{self.data_dir}/{self.TICKER}/buy_sell.csv"):
                 with open(f"{self.data_dir}/{self.TICKER}/buy_sell.csv", "w", encoding="utf-8") as handler:
                     handler.write("date")
@@ -86,13 +82,6 @@ class TradingRepository:
                 handler.write(f",{code}")
                 handler.write(f",{trade.price}")
                 handler.write(f",{trade.market_price}")
-
-            if code == "BUY":
-                with open(f"{self.data_dir}/{self.TICKER}/buy.csv", "a", encoding="utf-8") as handler:
-                    handler.write(f"\n{fdt}")
-                    handler.write(f",{trade.ticker}")
-                    handler.write(f",{trade.price}")
-                    handler.write(f",{trade.market_price}")
         except Exception as err:
             self.log.error(err)
             pass

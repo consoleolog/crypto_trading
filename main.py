@@ -33,13 +33,13 @@ def main(ticker: str):
         if (stage == 1 or stage == 2 or stage == 3) and trading_service.can_sell() == True:
             trading_service.SELL()
 
-        time.sleep(60)
+        time.sleep(70)
 
 
 if __name__ == '__main__':
 
-    tickers: list[str] = ["BTC","ETH","BCH","SOL"]
-    # tickers: list[str] = ["XRP","DOGE","SHIB"]
+    tickers: list[str] = ["BTC","BCH","SOL","AAVE"]
+    # tickers: list[str] = ["XRP","DOGE","SHIB","BSV","ETH"]
 
     pool = ThreadPool(len(tickers))
     result = pool.map(main, tickers)
