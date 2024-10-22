@@ -1,10 +1,10 @@
 import time
 from multiprocessing.dummy import Pool as ThreadPool
 
-from container import Container
+from trading_application import TradingApplication
 
 def main(ticker: str):
-    app = Container(ticker)
+    app = TradingApplication(ticker)
 
     app.common_util.init()
 

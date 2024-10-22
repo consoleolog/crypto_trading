@@ -6,7 +6,7 @@ from util.crypto_util import CryptoUtil
 from util.trade_util import TradeUtil
 
 
-class Container:
+class TradingApplication:
 
     def __init__(self, ticker):
         self.ticker = ticker
