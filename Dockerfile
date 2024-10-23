@@ -1,11 +1,8 @@
-FROM python:3.11
+FROM python:3.10
 
-RUN apt-get update && \
-    apt install python3-poetry -y
+RUN mkdir -p /src
 
-RUN mkdir -p /app/src
-
-COPY . /app/src
+COPY . /src
 
 WORKDIR /app/src
 
@@ -13,6 +10,6 @@ VOLUME /logs
 
 VOLUME /data
 
-RUN poetry install
+RUN pip install -r requirements.txt
 
 CMD ["python","main.py"]
