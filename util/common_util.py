@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from config import SMTP_FROM, SMTP_TO, NAVER_PASSWORD, NAVER_ID
-from logger import get_logger
+from config import get_logger
 
 class CommonUtil:
     def __init__(self, ticker:str):
@@ -42,6 +42,7 @@ class CommonUtil:
                     handler.write(",macd_upper")
                     handler.write(",macd_middle")
                     handler.write(",macd_lower")
+                    handler.write(",macd_lower_predict")
                     handler.write(",close_slope")
                     handler.write(",ema_short_slope")
                     handler.write(",ema_middle_slope")

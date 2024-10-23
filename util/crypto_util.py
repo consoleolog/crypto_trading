@@ -6,7 +6,7 @@ import pyupbit
 from pandas import DataFrame
 from pyupbit import Upbit
 
-from logger import get_logger
+from config import get_logger
 from model.crypto import Crypto
 
 
@@ -77,6 +77,16 @@ class CryptoUtil:
         except Exception as err:
             self.log.error(err)
 
+    def create_reference_data(self):
+        data = self.ema("minute1", 500, {
+            "short":10,
+            "middle":20,
+            "long":40,
+            "signal":9
+        })
+        data.to_csv(f"{self.data_dir}/{self.ticker}/{self.ticker}.csv", encoding='utf-8')
+
+        return data
 
     def get_history(self)-> DataFrame:
         try:
@@ -100,8 +110,14 @@ class CryptoUtil:
             self.log.error(err)
             return 0
 
+    def get_current_profit(self):
+        if self.get_my_price() is not None and self.get_my_price() != 0:
+            return (pyupbit.get_current_price(
+            f"KRW-{self.ticker}") - self.get_my_price()) / self.get_my_price() * 100
+        else:
+            return 0
 
-    def save_data(self, crypto: Crypto, stage: int)->None:
+    def save_data(self, crypto: Crypto, predict_val, stage: int)->None:
         try:
             with open(f'{self.data_dir}/{self.ticker}/data.csv', 'a', encoding='utf-8') as handler:
                 handler.write(f"\n{crypto.date}")
@@ -117,6 +133,7 @@ class CryptoUtil:
                 handler.write(f",{crypto.macd_upper}")
                 handler.write(f",{crypto.macd_middle}")
                 handler.write(f",{crypto.macd_lower}")
+                handler.write(f",{predict_val}")
                 handler.write(f",{crypto.close_slope}")
                 handler.write(f",{crypto.ema_short_slope}")
                 handler.write(f",{crypto.ema_middle_slope}")

@@ -1,11 +1,11 @@
 import os
 from datetime import datetime
-from typing import Union, Any
 
 import pyupbit
 from pyupbit import Upbit
+from sklearn.linear_model import LinearRegression
 
-from logger import get_logger
+from config import get_logger
 from model.crypto import Crypto
 from model.trade import Trade
 from util.common_util import CommonUtil
@@ -24,7 +24,8 @@ class TradeUtil:
         self.upbit = upbit
         self.log = get_logger(ticker)
 
-    def get_stage(self, data)-> int:
+    def get_stage(self, data, model:LinearRegression)-> int:
+        predict_val = model.predict([ [data["macd_middle"].iloc[-2]] ])[0]
         result = {}
         try:
             crypto = Crypto(data)
@@ -47,20 +48,10 @@ class TradeUtil:
             elif crypto.ema_short >= crypto.ema_long >= crypto.ema_middle:
                 result["stage"] = 6
 
-            self.crypto_util.save_data(crypto, result["stage"])
+            self.crypto_util.save_data(crypto, predict_val ,result["stage"])
             return result["stage"]
         except Exception as err:
             self.log.error(err)
-
-    def response_stage(self, stage:int)-> None:
-        # 매수 검토
-        if (stage == 4 or stage == 5 or stage == 6) and self.crypto_util.get_amount(self.ticker) == 0:
-            msg = self.can_buy(stage)
-            if msg["result"]:
-                self.buy(msg["price"])
-        # 매도 검토
-        elif (stage == 1 or stage == 2 or stage == 3) and self.crypto_util.get_amount(self.ticker) != 0 and self.can_sell(stage) == True:
-            self.sell()
 
     def buy(self, price: int) -> None:
         try:
@@ -91,85 +82,6 @@ class TradeUtil:
         except Exception as error:
             self.log.error(error)
 
-    def compare_for_buy(self, key: str, n: int, index:int = 2) -> bool:
-        try:
-            data = self.crypto_util.get_history()
-            for i in range(0, n):
-                if not (data[key].iloc[-(i + 1)] > data[key].iloc[-(i + index)]):
-                    return False
-            return True
-        except Exception as err:
-            self.log.error(err)
-            return False
-
-    def compare_for_sell(self, key: str, n: int, index:int = 2) -> bool:
-        try:
-            data = self.crypto_util.get_history()
-            for i in range(0, n):
-                if not (data[key].iloc[-(i + 1)] < data[key].iloc[-(i + index)]):
-                    return False
-            return True
-        except Exception as err:
-            self.log.error(err)
-            return False
-
-    def can_buy(self, stage: int)->dict[str, Any]:
-        data = {}
-        try :
-            if (stage == 4 and self.crypto_util.get_amount("KRW") > 6003 and len(
-                    self.crypto_util.get_history()) > 5 and
-                    (self.compare_for_buy("macd_upper", 4, 2) or self.compare_for_buy("macd_upper", 4, 3)) and
-                    (self.compare_for_buy("macd_middle", 4, 2) or self.compare_for_buy("macd_middle", 4, 3)) and
-                    (self.compare_for_buy("macd_lower", 4, 2) or self.compare_for_buy("macd_lower", 4, 3))):
-                data["price"] = 6000
-                data["result"] = True
-            elif (stage == 5 and self.crypto_util.get_amount("KRW") > 7004 and len(
-                    self.crypto_util.get_history()) > 5 and
-                  (self.compare_for_buy("macd_upper", 5, 2) or self.compare_for_buy("macd_upper", 4, 3)) and
-                  (self.compare_for_buy("macd_middle", 4, 2) or self.compare_for_buy("macd_middle", 4, 3)) and
-                  (self.compare_for_buy("macd_lower", 4, 2) or self.compare_for_buy("macd_lower", 4, 3))):
-                data["price"] = 7000
-                data["result"] = True
-            elif (stage == 6 and self.crypto_util.get_amount("KRW") > 8004 and len(
-                    self.crypto_util.get_history()) > 5 and
-                  (self.compare_for_buy("macd_upper", 5, 2) or self.compare_for_buy("macd_upper", 5, 3)) and
-                  (self.compare_for_buy("macd_middle", 4, 2) or self.compare_for_buy("macd_middle", 4, 3)) and
-                  (self.compare_for_buy("macd_lower", 4, 2) or self.compare_for_buy("macd_lower", 4, 3))):
-                data["price"] = 8000
-                data["result"] = True
-            else:
-                data["result"] = False
-        except Exception as err:
-            self.log.error(err)
-            data["result"] = False
-        return data
-
-    def can_sell(self, stage: int):
-        profit = (pyupbit.get_current_price(
-            f"KRW-{self.ticker}") - self.crypto_util.get_my_price()) / self.crypto_util.get_my_price() * 100
-
-        try :
-            if (stage == 1  and len( self.crypto_util.get_history()) > 5 and profit > 0.8 and
-                    (self.compare_for_sell("macd_upper", 3, 2) or self.compare_for_sell("macd_upper", 3, 3)) and
-                    (self.compare_for_sell("macd_middle", 2, 2) or self.compare_for_sell("macd_middle", 2, 3)) and
-                    (self.compare_for_sell("macd_lower", 2, 2) or self.compare_for_sell("macd_lower", 2, 3))):
-                    return True
-            elif (stage == 2 and len(self.crypto_util.get_history()) > 5 and profit > 0.8 and
-                  (self.compare_for_sell("macd_upper", 3, 2) or self.compare_for_sell("macd_upper", 3, 3)) and
-                  (self.compare_for_sell("macd_middle", 3, 2) or self.compare_for_sell("macd_middle", 3, 3)) and
-                  (self.compare_for_sell("macd_lower", 3, 2) or self.compare_for_sell("macd_lower", 2, 3))):
-                   return True
-            elif (stage == 3  and len(self.crypto_util.get_history()) > 5 and profit > 0.8 and
-                  (self.compare_for_sell("macd_upper", 3, 2) or self.compare_for_sell("macd_upper", 3, 3)) and
-                  (self.compare_for_sell("macd_middle", 3, 2) or self.compare_for_sell("macd_middle", 3, 3)) and
-                  (self.compare_for_sell("macd_lower", 3, 2) or self.compare_for_sell("macd_lower", 3, 3))):
-                  return True
-            else:
-                return False
-        except Exception as err:
-            self.log.error(err)
-            return False
-
     def save_result(self, trade: Trade, code: str)->None:
         try:
             datefmt = '%Y-%m-%d %H:%M:%S'
@@ -185,3 +97,94 @@ class TradeUtil:
         except Exception as err:
             self.log.error(err)
 
+    def response_stage(self, stage, model: LinearRegression):
+        try:
+            history = self.crypto_util.get_history()
+            macd_upper, macd_middle, macd_lower = history["macd_upper"], history["macd_middle"], history["macd_lower"]
+
+            data = {"result": "wait"}
+
+            if len(self.crypto_util.get_history()) > 1:
+                predict_values = model.predict([[macd_middle.iloc[-1]],[macd_middle.iloc[-2]]])
+
+                self.log.info(predict_values)
+
+                if predict_values[0] > predict_values[1]:
+                    data["predict"] = "buy"
+                else:
+                    data["predict"] = "sell"
+
+
+            if (stage == 1 or stage == 2 or stage == 3) and len(self.crypto_util.get_history()) > 5:
+                data["code"] = "sell"
+                # 매도 검토
+                if (macd_upper.iloc[-1] < macd_upper.iloc[-2] < macd_upper.iloc[-3] and
+                        macd_middle.iloc[-1] < macd_middle.iloc[-2] < macd_middle.iloc[-3] and
+                        macd_lower.iloc[-1] < macd_lower.iloc[-2]):
+                    data["result"] = "sell"
+
+            elif stage == 4 and len(self.crypto_util.get_history()) > 5:
+                data["code"] = "buy"
+
+                # 매수 검토
+                if (macd_upper.iloc[-1] > macd_upper.iloc[-2] > macd_upper.iloc[-3] and
+                        macd_middle.iloc[-1] > macd_middle.iloc[-2] > macd_middle.iloc[-3] > macd_middle.iloc[-4] and
+                        macd_lower.iloc[-1] > macd_lower.iloc[-2]):
+                    data["result"] = "buy"
+                    data["price"] = 8000
+
+                # 매수 철회 검토
+                elif (macd_upper.iloc[-1] < macd_upper.iloc[-2] < macd_upper.iloc[-3] and
+                      macd_middle.iloc[-1] < macd_middle.iloc[-2] < macd_middle.iloc[-3]):
+                    data["result"] = "sell"
+
+            elif stage == 5 and len(self.crypto_util.get_history()) > 5:
+                data["code"] = "buy"
+
+                # 매수 검토
+                if (macd_upper.iloc[-1] > macd_upper.iloc[-2] > macd_upper.iloc[-3] > macd_upper.iloc[-4] and
+                        macd_middle.iloc[-1] > macd_middle.iloc[-2] > macd_middle.iloc[-3] > macd_middle.iloc[-4] and
+                        macd_lower.iloc[-1] > macd_lower.iloc[-2] > macd_lower.iloc[-3] ):
+                    data["result"] = "buy"
+                    data["price"] = 9000
+
+                # 매수 철회 검토
+                elif (macd_upper.iloc[-1] < macd_upper.iloc[-2] < macd_upper.iloc[-3] and
+                      macd_middle.iloc[-1] < macd_middle.iloc[-2] < macd_middle.iloc[-3]
+                      ):
+                    data["result"] = "sell"
+
+            elif stage == 6 and len(self.crypto_util.get_history()) > 5:
+                data["code"] = "buy"
+
+                # 매수 검토
+                if (macd_upper.iloc[-1] > macd_upper.iloc[-2] > macd_upper.iloc[-3] > macd_upper.iloc[-4] and
+                        macd_middle.iloc[-1] > macd_middle.iloc[-2] > macd_middle.iloc[-3] > macd_middle.iloc[-4] and
+                        macd_lower.iloc[-1] > macd_lower.iloc[-2] > macd_lower.iloc[-3] > macd_lower.iloc[-4]):
+                    data["result"] = "buy"
+                    data["price"] = 10000
+
+                # 매수 철회 검토
+                elif (macd_upper.iloc[-1] < macd_upper.iloc[-2] < macd_upper.iloc[-3] and
+                      macd_middle.iloc[-1] < macd_middle.iloc[-2] < macd_middle.iloc[-3]
+                      ):
+                    data["result"] = "sell"
+
+            # 매수 신호
+            if data["result"] == "buy" and self.crypto_util.get_amount(self.ticker) == 0:
+                # self.buy(data["price"])
+                pass
+            # 매도 신호
+            elif data["result"] == "sell" and self.crypto_util.get_amount(self.ticker) != 0:
+                # 매수 철회 일 때
+                if data["code"] == "buy" and data["predict"] == "sell":
+                    # self.sell()
+                    pass
+                # 그냥 매도 신호 일 때
+                else:
+                    if self.crypto_util.get_current_profit() > 0.7:
+                        # self.sell()
+                        pass
+
+        except Exception as err:
+            self.log.error(err)
