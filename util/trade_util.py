@@ -24,10 +24,8 @@ class TradeUtil:
         self.ticker = ticker
         self.upbit = upbit
         self.log = get_logger(ticker)
-        self.crypto_data = pd.read_csv(f"{os.getcwd()}/data/{self.ticker}/data.csv", encoding='utf-8')
-        self.crypto_predict_data = pd.read_csv(f"{os.getcwd()}/data/{self.ticker}/predict_data.csv", encoding='utf-8')
 
-    def predict_values(self, data, models):
+    def predict_values(self, data, models:dict[str, LinearRegression]):
 
         result = {}
 
@@ -151,96 +149,113 @@ class TradeUtil:
         except Exception as err:
             self.log.error(err)
 
-    def response_stage(self, stage):
+    def response_stage(self, stage, models: dict[str, LinearRegression]):
         try:
-            macd_upper, macd_middle, macd_lower = self.crypto_data["macd_upper"], self.crypto_data["macd_middle"], self.crypto_data["macd_lower"]
-            predict_upper, predict_middle, predict_lower = self.crypto_predict_data["macd_upper"], self.crypto_predict_data["macd_middle"], self.crypto_predict_data["macd_lower"]
+            crypto_data = pd.read_csv(f"{os.getcwd()}/data/{self.ticker}/data.csv", encoding='utf-8')
+            crypto_predict_data = pd.read_csv(f"{os.getcwd()}/data/{self.ticker}/predict_data.csv", encoding='utf-8')
+
+            macd_upper, macd_middle, macd_lower = crypto_data["macd_upper"], crypto_data["macd_middle"], crypto_data[
+                "macd_lower"]
+            predict_upper, predict_middle, predict_lower = crypto_predict_data["macd_upper"], crypto_predict_data[
+                "macd_middle"], crypto_predict_data["macd_lower"]
 
             data = {"result": "wait"}
 
-            if (stage == 1 or stage == 2 or stage == 3) and len(self.crypto_data) > 5:
+            if (stage == 1 or stage == 2 or stage == 3) and len(crypto_data) > 5:
                 data["code"] = "sell"
                 # 매도 검토
-                if (macd_upper.iloc[-1] < macd_upper.iloc[-2] < macd_upper.iloc[-3] and
-                        macd_middle.iloc[-1] < macd_middle.iloc[-2] < macd_middle.iloc[-3] and
-                        macd_lower.iloc[-1] < macd_lower.iloc[-2]):
+                if all([macd_upper.iloc[-1] < macd_upper.iloc[-2], macd_upper.iloc[-2] < macd_upper.iloc[-3]]) and \
+                        all([macd_middle.iloc[-1] < macd_middle.iloc[-2],
+                             macd_middle.iloc[-2] < macd_middle.iloc[-3]]) and \
+                        macd_lower.iloc[-1] < macd_lower.iloc[-2]:
                     data["result"] = "sell"
 
-            elif stage == 4 and len(self.crypto_data) > 5:
+            elif stage == 4 and len(crypto_data) > 5:
                 data["code"] = "buy"
-
                 # 매수 검토
-                if (macd_upper.iloc[-1] > macd_upper.iloc[-2] > macd_upper.iloc[-3] and
-                        macd_middle.iloc[-1] > macd_middle.iloc[-2] > macd_middle.iloc[-3] > macd_middle.iloc[-4] and
-                        macd_lower.iloc[-1] > macd_lower.iloc[-2] and
-                    predict_upper.iloc[-1] > predict_upper.iloc[-2] and
-                    predict_middle.iloc[-1] > predict_middle.iloc[-2] and
-                    predict_lower.iloc[-1] > predict_lower.iloc[-2]):
+                if all([macd_upper.iloc[-1] > macd_upper.iloc[-2], macd_upper.iloc[-2] > macd_upper.iloc[-3]]) and \
+                        all([macd_middle.iloc[-1] > macd_middle.iloc[-2], macd_middle.iloc[-2] > macd_middle.iloc[-3],
+                             macd_middle.iloc[-3] > macd_middle.iloc[-4]]) and \
+                        macd_lower.iloc[-1] > macd_lower.iloc[-2] and \
+                        all([predict_upper.iloc[-1] > predict_upper.iloc[-2],
+                             predict_middle.iloc[-1] > predict_middle.iloc[-2],
+                             predict_lower.iloc[-1] > predict_lower.iloc[-2]]):
+                    data["result"] = "buy"
+                    data["price"] = 6000
+
+                # 매수 철회 검토
+                elif all([macd_upper.iloc[-1] < macd_upper.iloc[-2], macd_upper.iloc[-2] < macd_upper.iloc[-3]]) and \
+                        all([macd_middle.iloc[-1] < macd_middle.iloc[-2],
+                             macd_middle.iloc[-2] < macd_middle.iloc[-3]]) and \
+                        all([predict_upper.iloc[-1] < predict_upper.iloc[-2],
+                             predict_middle.iloc[-1] < predict_middle.iloc[-2]]):
+                    data["result"] = "sell"
+
+            elif stage == 5 and len(crypto_data) > 5:
+                data["code"] = "buy"
+                # 매수 검토
+                if all([macd_upper.iloc[-1] > macd_upper.iloc[-2], macd_upper.iloc[-2] > macd_upper.iloc[-3],
+                        macd_upper.iloc[-3] > macd_upper.iloc[-4]]) and \
+                        all([macd_middle.iloc[-1] > macd_middle.iloc[-2], macd_middle.iloc[-2] > macd_middle.iloc[-3],
+                             macd_middle.iloc[-3] > macd_middle.iloc[-4]]) and \
+                        all([macd_lower.iloc[-1] > macd_lower.iloc[-2], macd_lower.iloc[-2] > macd_lower.iloc[-3]]) and \
+                        all([predict_upper.iloc[-1] > predict_upper.iloc[-2],
+                             predict_middle.iloc[-1] > predict_middle.iloc[-2],
+                             predict_lower.iloc[-1] > predict_lower.iloc[-2]]):
+                    data["result"] = "buy"
+                    data["price"] = 7000
+
+                # 매수 철회 검토
+                elif all([macd_upper.iloc[-1] < macd_upper.iloc[-2], macd_upper.iloc[-2] < macd_upper.iloc[-3]]) and \
+                        all([macd_middle.iloc[-1] < macd_middle.iloc[-2],
+                             macd_middle.iloc[-2] < macd_middle.iloc[-3]]) and \
+                        all([predict_upper.iloc[-1] < predict_upper.iloc[-2],
+                             predict_middle.iloc[-1] < predict_middle.iloc[-2]]):
+                    data["result"] = "sell"
+
+            elif stage == 6 and len(crypto_data) > 5:
+                data["code"] = "buy"
+                # 매수 검토
+                if all([macd_upper.iloc[-1] > macd_upper.iloc[-2], macd_upper.iloc[-2] > macd_upper.iloc[-3],
+                        macd_upper.iloc[-3] > macd_upper.iloc[-4]]) and \
+                        all([macd_middle.iloc[-1] > macd_middle.iloc[-2], macd_middle.iloc[-2] > macd_middle.iloc[-3],
+                             macd_middle.iloc[-3] > macd_middle.iloc[-4]]) and \
+                        all([macd_lower.iloc[-1] > macd_lower.iloc[-2], macd_lower.iloc[-2] > macd_lower.iloc[-3],
+                             macd_lower.iloc[-3] > macd_lower.iloc[-4]]) and \
+                        all([predict_upper.iloc[-1] > predict_upper.iloc[-2],
+                             predict_middle.iloc[-1] > predict_middle.iloc[-2],
+                             predict_lower.iloc[-1] > predict_lower.iloc[-2]]):
                     data["result"] = "buy"
                     data["price"] = 8000
 
                 # 매수 철회 검토
-                elif (macd_upper.iloc[-1] < macd_upper.iloc[-2] < macd_upper.iloc[-3] and
-                      macd_middle.iloc[-1] < macd_middle.iloc[-2] < macd_middle.iloc[-3] and
-                      predict_upper.iloc[-1] < predict_upper.iloc[-2] and
-                      predict_middle.iloc[-1] < predict_middle.iloc[-2]):
-                    data["result"] = "sell"
-
-            elif stage == 5 and len(self.crypto_data) > 5:
-                data["code"] = "buy"
-
-                # 매수 검토
-                if (macd_upper.iloc[-1] > macd_upper.iloc[-2] > macd_upper.iloc[-3] > macd_upper.iloc[-4] and
-                        macd_middle.iloc[-1] > macd_middle.iloc[-2] > macd_middle.iloc[-3] > macd_middle.iloc[-4] and
-                        macd_lower.iloc[-1] > macd_lower.iloc[-2] > macd_lower.iloc[-3] and
-                        predict_upper.iloc[-1] > predict_upper.iloc[-2] and
-                        predict_middle.iloc[-1] > predict_middle.iloc[-2] and
-                        predict_lower.iloc[-1] > predict_lower.iloc[-2]):
-                    data["result"] = "buy"
-                    data["price"] = 9000
-
-                # 매수 철회 검토
-                elif (macd_upper.iloc[-1] < macd_upper.iloc[-2] < macd_upper.iloc[-3] and
-                      macd_middle.iloc[-1] < macd_middle.iloc[-2] < macd_middle.iloc[-3] and
-                      predict_upper.iloc[-1] < predict_upper.iloc[-2] and
-                      predict_middle.iloc[-1] < predict_middle.iloc[-2]):
-                    data["result"] = "sell"
-
-            elif stage == 6 and len(self.crypto_data) > 5:
-                data["code"] = "buy"
-
-                # 매수 검토
-                if (macd_upper.iloc[-1] > macd_upper.iloc[-2] > macd_upper.iloc[-3] > macd_upper.iloc[-4] and
-                        macd_middle.iloc[-1] > macd_middle.iloc[-2] > macd_middle.iloc[-3] > macd_middle.iloc[-4] and
-                        macd_lower.iloc[-1] > macd_lower.iloc[-2] > macd_lower.iloc[-3] > macd_lower.iloc[-4] and
-                    predict_upper.iloc[-1] > predict_upper.iloc[-2] and
-                    predict_middle.iloc[-1] > predict_middle.iloc[-2] and
-                    predict_lower.iloc[-1] > predict_lower.iloc[-2]):
-                    data["result"] = "buy"
-                    data["price"] = 10000
-
-                # 매수 철회 검토
-                elif (macd_upper.iloc[-1] < macd_upper.iloc[-2] < macd_upper.iloc[-3] and
-                      macd_middle.iloc[-1] < macd_middle.iloc[-2] < macd_middle.iloc[-3] and
-                      predict_upper.iloc[-1] < predict_upper.iloc[-2] and
-                      predict_middle.iloc[-1] < predict_middle.iloc[-2]):
+                elif all([macd_upper.iloc[-1] < macd_upper.iloc[-2], macd_upper.iloc[-2] < macd_upper.iloc[-3]]) and \
+                        all([macd_middle.iloc[-1] < macd_middle.iloc[-2],
+                             macd_middle.iloc[-2] < macd_middle.iloc[-3]]) and \
+                        all([predict_upper.iloc[-1] < predict_upper.iloc[-2],
+                             predict_middle.iloc[-1] < predict_middle.iloc[-2]]):
                     data["result"] = "sell"
 
             # 매수 신호
             if data["result"] == "buy" and self.crypto_util.get_amount(self.ticker) == 0:
-                # self.buy(data["price"])
-                pass
+                self.buy(data["price"])
+
             # 매도 신호
             elif data["result"] == "sell" and self.crypto_util.get_amount(self.ticker) != 0:
-                # 매수 철회 일 때
+                new_predict_upper = int(models["macd_upper"].predict([[predict_upper.iloc[-1]]])[0])
+                new_predict_middle = int(models["macd_middle"].predict([[predict_middle.iloc[-1]]])[0])
+                new_predict_lower = int(models["macd_lower"].predict([[predict_lower.iloc[-1]]])[0])
+                # 매수 철회일 때
                 if data["code"] == "buy":
-                    # self.sell()
-                    pass
-                # 그냥 매도 신호 일 때
+                    if new_predict_upper < predict_upper.iloc[-1] and new_predict_middle < predict_middle.iloc[-1]:
+                        self.sell()
+                # 그냥 매도 신호일 때
                 else:
-                    if self.crypto_util.get_current_profit() > 0.7:
-                        # self.sell()
-                        pass
+                    if self.crypto_util.get_current_profit() > 0.7 and \
+                            new_predict_upper < predict_upper.iloc[-1] and \
+                            new_predict_middle < predict_middle.iloc[-1] and \
+                            new_predict_lower < predict_lower.iloc[-1]:
+                        self.sell()
 
         except Exception as err:
             self.log.error(err)

@@ -28,7 +28,7 @@ def get_models(app, ticker):
 
 def update_models(app, ticker, models):
     while True:
-        time.sleep(10800)
+        time.sleep(7200)
         new_models = get_models(app, ticker)
         models.clear()
         models.update(new_models)
@@ -36,10 +36,12 @@ def update_models(app, ticker, models):
 
 def main(ticker: str):
     if not os.path.exists(f"{os.getcwd()}/data"):
-        os.mkdir(f"{os.getcwd()}/data")
+        os.mkdir(f"{os.getcwd()}/data/")
 
     log = get_logger(ticker)
+
     app = TradingApplication(ticker)
+
     app.common_util.init()
 
     log.info(f"start {ticker} trading....")
@@ -59,16 +61,16 @@ def main(ticker: str):
                         "long": 40,
                         "signal": 9,
                     }), models
-                )
+                ), models
             )
             time.sleep(60)
         except Exception as err:
-            log.error(f"Error occurred: {err}")
-            time.sleep(60)
+            log.error(err)
 
 
 if __name__ == '__main__':
-    tickers: list[str] = ["ETH"]
+    tickers: list[str] = ["ETH","BTC","AAVE","SOL"]
+    # "BCH" "BSV" "AVAX" "ETC" "BTG"
 
     pool = ThreadPool(len(tickers))
     pool.map(main, tickers)
