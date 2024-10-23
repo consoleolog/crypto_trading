@@ -1,0 +1,13 @@
+pyupbit~=0.2.34
+pandas~=2.2.3
+python-dotenv~=1.0.1
+langchain-openai
+langchain-core
+pydantic
+langchain-community
+scipy
+statsmodels~=0.14.4
+scikit-learn~=1.5.2
+numpy~=1.26.4
+fastapi~=0.115.2
+uvicorn
