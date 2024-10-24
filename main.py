@@ -69,10 +69,11 @@ def main(ticker: str):
 
 
 if __name__ == '__main__':
-    tickers: list[str] = ["ETH","BTC","AAVE","SOL"]
-    # "BCH" "BSV" "AVAX" "ETC" "BTG"
+    tickers: list[str] = [ "BCH","BSV","AVAX"]
+    # "BCH","BSV","AVAX","ETC","BTG"
 
-    pool = ThreadPool(len(tickers))
-    pool.map(main, tickers)
-    pool.close()
-    pool.join()
+    # pool = ThreadPool(len(tickers))
+    # pool.map(main, tickers)
+    # pool.close()
+    # pool.join()
+    main("BCH")

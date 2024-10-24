@@ -51,6 +51,10 @@ class CryptoUtil:
             data["macd_middle"] = data["ema_short"] - data["ema_long"]  # (중)
             data["macd_lower"] = data["ema_middle"] - data["ema_long"]  # (하)
 
+            data["upper_result"] = data["macd_upper"] > data["macd_upper"].shift(1)
+            data["middle_result"] = data["macd_middle"] > data["macd_middle"].shift(1)
+            data["lower_result"] = data["macd_lower"] > data["macd_lower"].shift(1)
+
             data = data.reset_index()
             data.rename(columns={"index": "date"}, inplace=True)
 
@@ -84,32 +88,38 @@ class CryptoUtil:
         else:
             return 0
 
-    def save_data(self, crypto: Crypto, stage: int)->None:
+    def save_data(self, crypto: Crypto, data)->None:
         try:
             with open(f'{self.data_dir}/{self.ticker}/data.csv', 'a', encoding='utf-8') as handler:
                 handler.write(f"\n{crypto.date}")
                 handler.write(f",{crypto.close}")
-                handler.write(f",{stage}")
+                handler.write(f",{data['stage']}")
                 handler.write(f",{crypto.ema_short}")
                 handler.write(f",{crypto.ema_middle}")
                 handler.write(f",{crypto.ema_long}")
                 handler.write(f",{crypto.macd_upper}")
                 handler.write(f",{crypto.macd_middle}")
                 handler.write(f",{crypto.macd_lower}")
+                handler.write(f",{data['upper']}")
+                handler.write(f",{data['middle']}")
+                handler.write(f",{data['lower']}")
         except Exception as err:
             self.log.error(err)
 
-    def save_predict_data(self, crypto: Crypto, stage: int)->None:
+    def save_predict_data(self, crypto: Crypto, data)->None:
         try:
             with open(f'{self.data_dir}/{self.ticker}/predict_data.csv', 'a', encoding='utf-8') as handler:
                 handler.write(f"\n{crypto.date}")
-                handler.write(f",{stage}")
+                handler.write(f",{data['stage']}")
                 handler.write(f",{crypto.ema_short}")
                 handler.write(f",{crypto.ema_middle}")
                 handler.write(f",{crypto.ema_long}")
                 handler.write(f",{crypto.macd_upper}")
                 handler.write(f",{crypto.macd_middle}")
                 handler.write(f",{crypto.macd_lower}")
+                handler.write(f",{data['upper']}")
+                handler.write(f",{data['middle']}")
+                handler.write(f",{data['lower']}")
         except Exception as err:
             self.log.error(err)
 

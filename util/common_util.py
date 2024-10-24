@@ -38,6 +38,9 @@ class CommonUtil:
                     handler.write(",macd_upper")
                     handler.write(",macd_middle")
                     handler.write(",macd_lower")
+                    handler.write(",upper_result")
+                    handler.write(",middle_result")
+                    handler.write(",lower_result")
 
             if not os.path.exists(f"{self.data_dir}/{self.ticker}/predict_data.csv"):
                 with open(f"{self.data_dir}/{self.ticker}/predict_data.csv", "w", encoding="utf-8") as handler:
@@ -49,6 +52,9 @@ class CommonUtil:
                     handler.write(",macd_upper")
                     handler.write(",macd_middle")
                     handler.write(",macd_lower")
+                    handler.write(",upper_result")
+                    handler.write(",middle_result")
+                    handler.write(",lower_result")
         except Exception as err:
             self.log.error(err)
 
