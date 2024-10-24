@@ -4,7 +4,7 @@ RUN mkdir -p /src
 
 COPY . /src
 
-WORKDIR /app/src
+WORKDIR /src
 
 VOLUME /logs
 
