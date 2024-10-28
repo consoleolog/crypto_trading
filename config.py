@@ -1,73 +1,57 @@
 import os
-import logging
-from logging import Logger
+from os.path import dirname, join
 from dotenv import load_dotenv
+from pyupbit import Upbit
 
-load_dotenv()
-
-OPENAI_API_KEY=os.getenv('OPENAI_API_KEY')
-
-UPBIT_ACCESS_KEY=os.getenv('UPBIT_ACCESS_KEY')
-UPBIT_SECRET_KEY=os.getenv('UPBIT_SECRET_KEY')
-
-NAVER_ID=os.getenv('NAVER_ID')
-NAVER_PASSWORD=os.getenv('NAVER_PASSWORD')
-
-SMTP_FROM=os.getenv('SMTP_FROM')
-SMTP_TO=os.getenv('SMTP_TO')
-
-fmt = "[%(levelname)s] %(asctime)s : %(filename)s : %(module)s : %(lineno)d - %(message)s"
-
-datefmt = '%Y-%m-%d %H:%M:%S'
-
-filefmt = '%Y%m%d%H%M'
-
-def get_logger(logging_service:str ="undefined")->Logger:
-    logger = logging.getLogger(f"{logging_service}_logger")
-    logger.setLevel(logging.DEBUG)
-    logger.propagate = False
-    log_dir = f"{os.getcwd()}/logs"
-    if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
-
-    file_formatter = logging.Formatter(
-        fmt=fmt,
-        datefmt=datefmt)
-    fh = logging.FileHandler(f"{log_dir}/{logging_service}.log", encoding='utf-8')
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(file_formatter)
-    logger.addHandler(fh)
-
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(CustomFormatter())
-    logger.addHandler(ch)
-
-    return logger
+from logger import get_logger
 
 
-class CustomFormatter(logging.Formatter):
-    grey = '\x1b[38;21m'
-    blue = '\x1b[38;5;39m'
-    yellow = '\x1b[38;5;226m'
-    red = '\x1b[38;5;196m'
-    bold_red = '\x1b[31;1m'
-    reset = '\x1b[0m'
-    green = '\x1b[38;5;46m'
-    bold_green = '\x1b[32;1m'
+class Provider:
+    env_path = join(dirname(__file__), '.env')
+    load_dotenv(env_path)
+    def __init__(self, ticker):
+        self.__openai_api_key=os.getenv("OPENAI_API_KEY")
+        self.__upbit_access_key = os.getenv('UPBIT_ACCESS_KEY')
+        self.__upbit_secret_key = os.getenv('UPBIT_SECRET_KEY')
 
-    def __init__(self):
-        super().__init__()
-        self.fmt = fmt
-        self.FORMATS = {
-            logging.DEBUG: self.bold_green + self.fmt + self.reset,
-            logging.INFO: self.blue + self.fmt + self.reset,
-            logging.WARNING: self.yellow + self.fmt + self.reset,
-            logging.ERROR: self.red + self.fmt + self.reset,
-            logging.CRITICAL: self.bold_red + self.fmt + self.reset
-        }
+        self.__naver_id = os.getenv('NAVER_ID')
+        self.__naver_password = os.getenv('NAVER_PASSWORD')
 
-    def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt, datefmt=datefmt)
-        return formatter.format(record)
+        self.__smtp_from = os.getenv('SMTP_FROM')
+        self.__smtp_to = os.getenv('SMTP_TO')
+
+        self.__upbit = Upbit(self.__upbit_access_key, self.__upbit_secret_key)
+
+        self.__ticker = ticker
+
+        self.__log = get_logger(ticker)
+
+    @property
+    def log(self):
+        return self.__log
+
+    @property
+    def ticker(self):
+        return self.__ticker
+
+    @property
+    def openai_api_key(self):
+        return self.__openai_api_key
+
+    @property
+    def upbit(self):
+        return self.__upbit
+
+    @property
+    def naver_id(self):
+        return self.__naver_id
+    @property
+    def naver_password(self):
+        return self.__naver_password
+    @property
+    def smtp_from(self):
+        return self.__smtp_from
+    @property
+    def smtp_to(self):
+        return self.__smtp_to
+
