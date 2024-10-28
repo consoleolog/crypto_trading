@@ -11,3 +11,4 @@ scikit-learn~=1.5.2
 numpy~=1.26.4
 fastapi~=0.115.2
 uvicorn
+streamlit
