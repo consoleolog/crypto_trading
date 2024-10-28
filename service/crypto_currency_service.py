@@ -99,6 +99,7 @@ class CryptoCurrencyService:
             if isinstance(msg, dict):
                 msg["market_price"] = pyupbit.get_current_price(f"KRW-{self.__ticker}")
                 self.__crypto_currency_repository.save_trading_history("buy", msg)
+                self.__log.debug(f"sending {self.__ticker} mail :: buy result ....")
                 self.__mail_service.send_mail({
                     "content": f"{self.__ticker} 매수 결과 보고",
                     "filename": "trading_history.csv"
@@ -108,7 +109,7 @@ class CryptoCurrencyService:
 
     def __sell(self):
         try:
-            msg = self.__upbit.sell_market_order(f"KRW-{self.__ticker}", self.__upbit.get_amount(f"KRW-{self.__ticker}"))
+            msg = self.__upbit.sell_market_order(f"KRW-{self.__ticker}", self.__crypto_currency_repository.get_amount(self.__ticker))
             if isinstance(msg, dict):
                 self.__log.debug(f"sending {self.__ticker} mail :: sell result ....")
                 msg['market_price'] = pyupbit.get_current_price(f"KRW-{self.__ticker}")
