@@ -32,13 +32,13 @@ class CryptoCurrencyService:
         self.__crypto_currency_repository.save_coin_data(data, stage)
 
         if len(self.__crypto_currency_repository.get_coin_history()) > 5:
-            self.__response_buy_stage(stage)
+            self.__response_stage(stage)
 
     def __get_my_price(self):
         price = 0
         count = 0
         try:
-            df = pd.read_csv(f"{self.__data_path}/{self.__ticker}/trading_history.csv", encoding="utf-8")
+            df = pd.read_csv(f"{self.__data_path}/trading_history.csv", encoding="utf-8")
             for i, data in df.iloc[::-1].iterrows():
                 if data["buy/sell"] == "SELL":
                     return price
@@ -50,9 +50,9 @@ class CryptoCurrencyService:
             self.__log.error(err)
             return 0
 
-    def __response_buy_stage(self, stage):
+    def __response_stage(self, stage):
 
-        data = self.__crypto_currency_repository.get_coin_history()
+        data = self.__crypto_currency_repository.get_coin_history().iloc[-1]
 
         if stage == 4 and all([data["upper_result"] == True,
                                data["middle_result"] == True,
@@ -60,12 +60,12 @@ class CryptoCurrencyService:
             # self.__buy(6000)
             self.__log.info("매수 신호")
         elif stage == 1  and all([data["upper_result"] == False,
-                                 data["middle_result"] == False,
-                                 data["lower_result"] == False]):
+                                 data["middle_result"] == False]):
             # self.__sell()
             self.__log.info("매도 신호")
 
-        elif self.__get_profit() > 0.2:
+        elif self.__get_profit() > 0.2 and all([data["upper_result"] == False,
+                                 data["middle_result"] == False]):
             # self.__sell()
             self.__log.info("매도 신호")
 

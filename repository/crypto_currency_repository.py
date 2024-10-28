@@ -57,6 +57,3 @@ class CryptoCurrencyRepository:
 
     def get_coin_history(self):
         return pd.read_csv(f"{self.__data_path}/data.csv", encoding="utf-8").tail(10)
-
-    def get_trading_history(self):
-        return pd.read_csv(f"{self.__data_path}/trading_history.csv", encoding="utf-8")
