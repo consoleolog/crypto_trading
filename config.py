@@ -10,8 +10,6 @@ class Provider:
     env_path = join(dirname(__file__), '.env')
     load_dotenv(env_path)
     def __init__(self, ticker):
-        self.__openai_api_key=os.getenv("OPENAI_API_KEY")
-
         self.__naver_id = os.getenv('NAVER_ID')
         self.__naver_password = os.getenv('NAVER_PASSWORD')
 
@@ -31,10 +29,6 @@ class Provider:
     @property
     def ticker(self):
         return self.__ticker
-
-    @property
-    def openai_api_key(self):
-        return self.__openai_api_key
 
     @property
     def upbit(self):
