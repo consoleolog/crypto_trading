@@ -22,7 +22,7 @@ class CryptoCurrencyService:
         self.__crypto_currency_repository = crypto_currency_repository
         self.__data_path = f"{os.getcwd()}/data/{provider.ticker}"
 
-    def start_trading(self,ema_options, interval="minute1"):
+    def start_trading(self, ema_options, price , interval="minute1"):
         try:
             data: Optional[DataFrame] = CryptoCurrencyUtil.get_macd(
                 CryptoCurrencyUtil.get_ema(self.__crypto_currency_repository.get_coin(interval), ema_options)
@@ -30,12 +30,21 @@ class CryptoCurrencyService:
 
             stage = CryptoCurrencyUtil.get_stage(data.iloc[-1])
 
+            self.__response_stage(stage=stage, data=data.iloc[-1], price=price)
+
+            history = pd.read_csv(f"{self.__data_path}/data.csv", encoding="utf-8")
+
+            if len(history) > 5000:
+                history = history.iloc[:0, :]
+                history.to_csv(f"{self.__data_path}/data.csv", encoding="utf-8", index=False)
+
             self.__crypto_currency_repository.save_coin_data(data, stage)
 
-            # if len(self.__crypto_currency_repository.get_coin_history()) > 5:
-            self.__response_stage(stage, data.iloc[-1])
         except Exception as err:
             self.__log.error(f"{self.__ticker} ERROR : {str(err)} ")
+
+    def get_krw(self):
+        return self.__crypto_currency_repository.get_amount("KRW")
 
     def __get_my_price(self):
         price = 0
@@ -53,19 +62,19 @@ class CryptoCurrencyService:
             self.__log.error(f"{self.__ticker} ERROR : {str(err)}")
             return 0
 
-    def __response_stage(self, stage, data):
+    def __response_stage(self, stage, data, price):
         try:
-            if (stage == 4 and self.__crypto_currency_repository.get_amount(self.__ticker) == 0
+            if (stage == 4 and self.__crypto_currency_repository.get_amount(self.__ticker) == 0 and self.get_krw() > price > 6000
                             and all([data["upper_result"] == True,
                                    data["middle_result"] == True,
                                    data["lower_result"] == True])):
                 self.__log.info(f"{self.__ticker} 매수 신호")
-                # self.__buy(6000)
-            elif (stage == 1 and self.__crypto_currency_repository.get_amount(self.__ticker) != 0 and
+                self.__buy(price)
+            elif (stage == 1 and self.__crypto_currency_repository.get_amount(self.__ticker) != 0 and self.__get_profit() > 0.15 and
                   all([data["upper_result"] == False,
                        data["middle_result"] == False])):
                 self.__log.info(f"{self.__ticker} 매도 신호")
-                # self.__sell()
+                self.__sell()
         except Exception as err:
             self.__log.error(f" {self.__ticker} ERROR : {str(err)} ")
 
