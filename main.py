@@ -10,7 +10,7 @@ def print_starting_banner(app, ticker, price):
     app.log.info(f"{ticker} trading start....")
     app.log.warning(f"{ticker}'s global order price is {price}....")
 
-tickers = ["BSV", "AAVE", "BCH", "XRP"]
+tickers:list[str] = CryptoCurrencyUtil.setting_ticker()
 
 def main(ticker):
     crypto_currency_app = CryptoCurrencyApplication(ticker)
