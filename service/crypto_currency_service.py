@@ -23,16 +23,19 @@ class CryptoCurrencyService:
         self.__data_path = f"{os.getcwd()}/data/{provider.ticker}"
 
     def start_trading(self,ema_options, interval="minute1"):
-        data: Optional[DataFrame] = CryptoCurrencyUtil.get_macd(
-            CryptoCurrencyUtil.get_ema(self.__crypto_currency_repository.get_coin(interval), ema_options)
-        )
+        try:
+            data: Optional[DataFrame] = CryptoCurrencyUtil.get_macd(
+                CryptoCurrencyUtil.get_ema(self.__crypto_currency_repository.get_coin(interval), ema_options)
+            )
 
-        stage = CryptoCurrencyUtil.get_stage(data.iloc[-1])
+            stage = CryptoCurrencyUtil.get_stage(data.iloc[-1])
 
-        self.__crypto_currency_repository.save_coin_data(data, stage)
+            self.__crypto_currency_repository.save_coin_data(data, stage)
 
-        if len(self.__crypto_currency_repository.get_coin_history()) > 5:
-            self.__response_stage(stage)
+            # if len(self.__crypto_currency_repository.get_coin_history()) > 5:
+            self.__response_stage(stage, data.iloc[-1])
+        except Exception as err:
+            self.__log.error(f"{self.__ticker} ERROR : {str(err)} ")
 
     def __get_my_price(self):
         price = 0
@@ -47,34 +50,30 @@ class CryptoCurrencyService:
                     count += 1
                 return price / count
         except Exception as err:
-            self.__log.error(err)
+            self.__log.error(f"{self.__ticker} ERROR : {str(err)}")
             return 0
 
-    def __response_stage(self, stage):
-
-        data = self.__crypto_currency_repository.get_coin_history().iloc[-1]
-
-        if stage == 4 and all([data["upper_result"] == True,
-                               data["middle_result"] == True,
-                               data["lower_result"] == True]):
-            # self.__buy(6000)
-            self.__log.info("매수 신호")
-        elif stage == 1  and all([data["upper_result"] == False,
-                                 data["middle_result"] == False]):
-            # self.__sell()
-            self.__log.info("매도 신호")
-
-        elif self.__get_profit() > 0.2 and all([data["upper_result"] == False,
-                                 data["middle_result"] == False]):
-            # self.__sell()
-            self.__log.info("매도 신호")
+    def __response_stage(self, stage, data):
+        try:
+            if (stage == 4 and self.__crypto_currency_repository.get_amount(self.__ticker) == 0
+                            and all([data["upper_result"] == True,
+                                   data["middle_result"] == True,
+                                   data["lower_result"] == True])):
+                self.__log.info(f"{self.__ticker} 매수 신호")
+                # self.__buy(6000)
+            elif (stage == 1 and self.__crypto_currency_repository.get_amount(self.__ticker) != 0 and
+                  all([data["upper_result"] == False,
+                       data["middle_result"] == False])):
+                self.__log.info(f"{self.__ticker} 매도 신호")
+                # self.__sell()
+        except Exception as err:
+            self.__log.error(f" {self.__ticker} ERROR : {str(err)} ")
 
     def __get_profit(self):
         if self.__get_my_price() is not None and self.__get_my_price() != 0:
             return (pyupbit.get_current_price(f"KRW-{self.__ticker}") - self.__get_my_price()) / self.__get_my_price() * 100
         else:
             return 0
-
 
     def create_crypto_currency_data_files(self):
         if not os.path.exists(self.__data_path):
@@ -105,7 +104,7 @@ class CryptoCurrencyService:
                     "filename": "trading_history.csv"
                 })
         except Exception as err:
-            self.__log.error(err)
+            self.__log.error(f"{self.__ticker} ERROR : {str(err)} ")
 
     def __sell(self):
         try:
@@ -119,6 +118,5 @@ class CryptoCurrencyService:
                     "content": f"{self.__ticker} 매도 결과 보고",
                     "filename": "trading_history.csv"
                 })
-        except Exception as error:
-            self.__log.error(error)
-
+        except Exception as err:
+            self.__log.error(f"{self.__ticker} ERROR : {str(err)} ")
