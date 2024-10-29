@@ -77,6 +77,3 @@ class CryptoCurrencyRepository:
                 mode="a", index=False, header=False, encoding="utf-8")
         except Exception as err:
             self.__log.error(f"{self.__ticker} ERROR : {str(err)} ")
-
-    def get_coin_history(self):
-        return pd.read_csv(f"{self.__data_path}/data.csv", encoding="utf-8").tail(10)

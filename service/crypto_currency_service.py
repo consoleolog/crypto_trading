@@ -30,10 +30,16 @@ class CryptoCurrencyService:
 
             stage = CryptoCurrencyUtil.get_stage(data.iloc[-1])
 
+            self.__response_stage(stage, data.iloc[-1])
+
+            history = pd.read_csv(f"{self.__data_path}/data.csv", encoding="utf-8")
+
+            if len(history) > 5000:
+                history = history.iloc[:0, :]
+                history.to_csv(f"{self.__data_path}/data.csv", encoding="utf-8", index=False)
+
             self.__crypto_currency_repository.save_coin_data(data, stage)
 
-            # if len(self.__crypto_currency_repository.get_coin_history()) > 5:
-            self.__response_stage(stage, data.iloc[-1])
         except Exception as err:
             self.__log.error(f"{self.__ticker} ERROR : {str(err)} ")
 
