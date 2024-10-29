@@ -27,9 +27,8 @@ def main(ticker):
         })
         time.sleep(60)
 
-
 if __name__ == '__main__':
-    tickers: list[str] = ["BSV"]
+    tickers = ["BTC", "ETH", "BSV", "AAVE", "BCH", "XRP"]
 
     pool = ThreadPool(len(tickers))
     pool.map(main, tickers)
