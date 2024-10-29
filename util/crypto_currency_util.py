@@ -1,4 +1,9 @@
 import os
+import time
+
+import numpy as np
+import pyupbit
+from sklearn.linear_model import LinearRegression
 
 
 class CryptoCurrencyUtil:
@@ -41,9 +46,69 @@ class CryptoCurrencyUtil:
         elif short >= long >= middle:
             return 6
 
-
-
     @staticmethod
     def create_data_dir():
         if not os.path.exists(f"{os.getcwd()}/data"):
             os.mkdir(f"{os.getcwd()}/data")
+
+    @staticmethod
+    def get_ticker_list():
+        tickers = []
+        for i, data in enumerate(pyupbit.get_tickers(fiat="KRW")):
+            try:
+                df = pyupbit.get_ohlcv(data, "minutes1", 1000)
+                df.reset_index()
+                df2 = pyupbit.get_ohlcv(data, "minutes1", 120)
+                df2.reset_index()
+                tickers.append(data.replace("KRW-", ""))
+            except AttributeError:
+                pass
+            time.sleep(1)
+        return tickers
+
+    @staticmethod
+    def coin_validation(ticker):
+        try:
+            df = pyupbit.get_ohlcv(f"KRW-{ticker}", "minutes", 1000)
+            data = CryptoCurrencyUtil.get_macd(
+                CryptoCurrencyUtil.get_ema(df, {
+                    "short": 10,
+                    "middle": 20,
+                    "long": 60,
+                })
+            )
+            ma_short, ma_middle, ma_long = (np.array(data["ema_short"]),
+                                            np.array(data["ema_middle"]),
+                                            np.array(data["ema_long"]))
+
+            macd_up, macd_middle, macd_low = (np.array(data["macd_upper"]),
+                                              np.array(data["macd_middle"]),
+                                              np.array(data["macd_lower"]))
+
+            MaShortModel = LinearRegression().fit(ma_middle.reshape((-1, 1)), ma_short)
+
+            MaMiddleModel = LinearRegression().fit(ma_short.reshape((-1, 1)), ma_middle)
+
+            MaLongModel = LinearRegression().fit(ma_middle.reshape((-1, 1)), ma_long)
+
+            MACDUpperModel = LinearRegression().fit(macd_middle.reshape((-1, 1)), macd_up)
+
+            MACDMiddleModel = LinearRegression().fit(macd_up.reshape((-1, 1)), macd_middle)
+
+            MACDLowerModel = LinearRegression().fit(macd_middle.reshape((-1, 1)), macd_low)
+
+            return {
+                "ema": {
+                    "short": MaShortModel.score(ma_middle.reshape((-1, 1)), ma_short),
+                    "middle": MaMiddleModel.score(ma_short.reshape((-1, 1)), ma_middle),
+                    "long": MaLongModel.score(ma_middle.reshape((-1, 1)), ma_long)
+                },
+                "macd": {
+                    "upper": MACDUpperModel.score(macd_middle.reshape((-1, 1)), macd_up),
+                    "middle": MACDMiddleModel.score(macd_up.reshape((-1, 1)), macd_middle),
+                    "lower": MACDLowerModel.score(macd_middle.reshape((-1, 1)), macd_low)
+                }
+            }
+        except TypeError:
+            pass
+
