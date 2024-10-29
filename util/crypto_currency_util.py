@@ -1,3 +1,4 @@
+import json
 import os
 import time
 
@@ -112,3 +113,11 @@ class CryptoCurrencyUtil:
         except TypeError:
             pass
 
+    @staticmethod
+    def setting_ticker():
+        with open(f"{os.getcwd()}/setting.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        combined_tickers = data["prefix_tickers"] + data["tickers"]
+
+        return list(set(combined_tickers))

@@ -1,0 +1,11 @@
+{
+  "prefix_tickers": [
+    "BTC",
+    "ETH",
+    "BSV",
+    "AAVE",
+    "BCH",
+    "XRP"
+  ],
+  "tickers": []
+}
