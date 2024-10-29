@@ -23,8 +23,14 @@ class CryptoCurrencyApplication:
             crypto_currency_repository=self.__crypto_currency_repository
         )
 
+        self.__log = self.__provider.log
+
 
     @property
     def crypto_currency_service(self):
         return self.__crypto_currency_service
+
+    @property
+    def log(self):
+        return self.__log
 

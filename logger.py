@@ -2,7 +2,7 @@ import logging
 import os
 
 def get_logger(logging_service):
-    fmt = f"[%(levelname)s] %(asctime)s : %(filename)s : %(module)s : %(lineno)d :: {logging_service} :: -  %(message)s"
+    fmt = f"[%(levelname)s] %(asctime)s : %(module)s : %(funcName)s : %(lineno)d :: {logging_service} :: -  %(message)s"
 
     datefmt = '%Y-%m-%d %H:%M:%S'
 
