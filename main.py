@@ -5,6 +5,9 @@ from util.crypto_currency_util import CryptoCurrencyUtil
 
 from multiprocessing.dummy import Pool as ThreadPool
 
+def print_starting_banner(app, ticker):
+    app.log.info(f"{ticker} trading start....")
+
 def main(ticker):
     crypto_currency_app = CryptoCurrencyApplication(ticker)
 
@@ -13,6 +16,8 @@ def main(ticker):
     CryptoCurrencyUtil.create_data_dir()
 
     crypto_currency_service.create_crypto_currency_data_files()
+
+    print_starting_banner(crypto_currency_app, ticker)
 
     while True:
         crypto_currency_service.start_trading({
