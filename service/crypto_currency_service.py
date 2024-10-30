@@ -28,7 +28,7 @@ class CryptoCurrencyService:
                 CryptoCurrencyUtil.get_ema(self.__crypto_currency_repository.get_coin(interval), ema_options)
             )
 
-            stage = CryptoCurrencyUtil.get_stage(data.iloc[-1])
+            stage = CryptoCurrencyUtil.get_stage(data)
 
             self.__response_stage(stage=stage, data=data.iloc[-1], price=price)
 
@@ -65,9 +65,10 @@ class CryptoCurrencyService:
     def __response_stage(self, stage, data, price):
         try:
             if (stage == 4 and self.__crypto_currency_repository.get_amount(self.__ticker) == 0 and self.get_krw() > price > 6000
-                            and all([data["upper_result"] == True,
-                                   data["middle_result"] == True,
-                                   data["lower_result"] == True])):
+                            and all([data["upper_result"].iloc[-1] == True,
+                                   data["middle_result"].iloc[-1] == True,
+                                   data["lower_result"].iloc[-1] == True,
+                                   data["middle_result"].iloc[-2] == True,])):
                 self.__log.info(f"{self.__ticker} 매수 신호")
                 self.__buy(price)
             elif (stage == 1 and self.__crypto_currency_repository.get_amount(self.__ticker) != 0 and self.__get_profit() > 0.15 and
