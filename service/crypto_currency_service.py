@@ -30,7 +30,7 @@ class CryptoCurrencyService:
 
             stage = CryptoCurrencyUtil.get_stage(data)
 
-            self.__response_stage(stage=stage, data=data.iloc[-1], price=price)
+            self.__response_stage(stage=stage, data=data, price=price)
 
             history = pd.read_csv(f"{self.__data_path}/data.csv", encoding="utf-8")
 
